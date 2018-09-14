@@ -11,7 +11,7 @@ import (
 func main() {
 	if len(os.Args) < 4 {
 		fmt.Fprintf(os.Stderr, "\x1b[93;1mAgrega un texto antes o despues de una determinada linea\n")
-		fmt.Fprintf(os.Stderr, "el primer parametro es -a o -b (After/Before)\n")
+		fmt.Fprintf(os.Stderr, "el primer parametro es -a , -b , -r (After/Before/Replace Line)\n")
 		fmt.Fprintf(os.Stderr, "el segundo parametro es la expresion regular a buscar\n")
 		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n")
 		fmt.Fprintf(os.Stderr, "\n\x1b[37;1madds [-a,-b] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\x1b[0m\n\n")
@@ -44,6 +44,9 @@ func printLine(line string, pos string, in *regexp.Regexp, ou string) {
 	case ok && pos == "-b":
 		fmt.Println(ou)
 		fmt.Println(line)
+		break
+	case ok && pos == "-r":
+		fmt.Println(ou)
 		break
 	default:
 		fmt.Println(line)
