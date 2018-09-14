@@ -19,8 +19,18 @@ func main() {
 	}
 
 	pos := os.Args[1]
-	in := regexp.MustCompile(os.Args[2])
+	in, err := regexp.Compile(os.Args[2])
 	ou := os.Args[3]
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Expresion Regular Invalida\n")
+		return
+	}
+
+	if !(pos == "-a" || pos == "-b" || pos == "-r") {
+		fmt.Fprintf(os.Stderr, "Opcion Invalida, opciones posibles -a -b -r\n")
+		return
+	}
 
 	ou = strings.Join(os.Args[3:], "\n")
 	ou = strings.Replace(ou, "\\t", "\t", -1)
@@ -40,14 +50,14 @@ func printLine(line string, pos string, in *regexp.Regexp, ou string) {
 	case ok && pos == "-a":
 		fmt.Println(line)
 		fmt.Println(ou)
-		break
+		return
 	case ok && pos == "-b":
 		fmt.Println(ou)
 		fmt.Println(line)
-		break
+		return
 	case ok && pos == "-r":
 		fmt.Println(ou)
-		break
+		return
 	default:
 		fmt.Println(line)
 	}
