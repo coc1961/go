@@ -65,13 +65,13 @@ func printLine(line string, pos string, in *regexp.Regexp, ou string) (string, s
 	ok := in.MatchString(line)
 	switch {
 	case ok && pos == "-a":
-		return line, ou
+		return line, ou // Agrego linea After
 	case ok && pos == "-b":
-		return ou, line
+		return ou, line // Agrego linea Before
 	case ok && pos == "-r":
-		return ou, ""
+		return ou, "" // Reemplazo la Linea entera por el nuevo texto
 	case ok && pos == "-x":
-		return in.ReplaceAllString(line, ou), ""
+		return in.ReplaceAllString(line, ou), "" // Modifico el texto de la linea original con el nuevo segun una expresion regular
 	default:
 		return line, ""
 	}
