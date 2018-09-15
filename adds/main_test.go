@@ -29,25 +29,45 @@ func Test_printLine(t *testing.T) {
 			//
 			// echo Server=papa papa | ./adds -x '^(.*?Server=)papa(.*?)$' '${1}Prueba${2}'
 			"Test Replace Regexp",
-			args{"Server=papa papa", "-x", regexp.MustCompile(`^(.*?Server=)\bpapa\b(.*?)$`), `${1}Prueba${2}`},
+			args{
+				"Server=papa papa",
+				"-x",
+				regexp.MustCompile(`^(.*?Server=)\bpapa\b(.*?)$`),
+				`${1}Prueba${2}`,
+			},
 			"Server=Prueba papa",
 			"",
 		},
 		{
 			"Test Replace Line",
-			args{"Server=papa papa", "-r", regexp.MustCompile(`Server`), `Prueba`},
+			args{
+				"Server=papa papa",
+				"-r",
+				regexp.MustCompile(`Server`),
+				`Prueba`,
+			},
 			"Prueba",
 			"",
 		},
 		{
 			"Test Replace Line",
-			args{"Server=papa papa", "-b", regexp.MustCompile(`Server`), `Prueba`},
+			args{
+				"Server=papa papa",
+				"-b",
+				regexp.MustCompile(`Server`),
+				`Prueba`,
+			},
 			"Prueba",
 			"Server=papa papa",
 		},
 		{
 			"Test Replace Line",
-			args{"Server=papa papa", "-a", regexp.MustCompile(`Server`), `Prueba`},
+			args{
+				"Server=papa papa",
+				"-a",
+				regexp.MustCompile(`Server`),
+				`Prueba`,
+			},
 			"Server=papa papa",
 			"Prueba",
 		},
