@@ -24,7 +24,7 @@ func main() {
 		return
 	}
 
-	pos := os.Args[1]
+	option := os.Args[1]
 	in, err := regexp.Compile(os.Args[2])
 	ou := os.Args[3]
 
@@ -33,7 +33,7 @@ func main() {
 		return
 	}
 
-	if !(pos == "-a" || pos == "-b" || pos == "-r" || pos == "-x") {
+	if !(option == "-a" || option == "-b" || option == "-r" || option == "-x") {
 		fmt.Fprintf(os.Stderr, "Opcion Invalida, opciones posibles -a -b -r -x\n")
 		return
 	}
@@ -43,10 +43,10 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	line := ""
 	for scanner.Scan() {
-		print(printLine(line, pos, in, ou))
+		print(printLine(line, option, in, ou))
 		line = scanner.Text()
 	}
-	print(printLine(line, pos, in, ou))
+	print(printLine(line, option, in, ou))
 
 }
 
