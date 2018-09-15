@@ -55,6 +55,12 @@ func print(s1, s2 string) {
 		fmt.Println(s2)
 	}
 }
+
+/*
+	Genero la linea a imprimir segun el parametro seleccionado -a -b -r -x
+	retorna dos lineas, la primera siempre tiene valor y la segunda es opcional segun
+	el tipo
+*/
 func printLine(line string, pos string, in *regexp.Regexp, ou string) (string, string) {
 	ok := in.MatchString(line)
 	switch {
