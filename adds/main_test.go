@@ -25,6 +25,9 @@ func Test_printLine(t *testing.T) {
 			// \bpapa\b Palabra Prueba
 			// Imprimo Grupo1 nueva_palabra grupo2
 			// ${1}Prueba${2}
+			// Prueba Manual
+			//
+			// echo Server=papa papa | ./adds -x '^(.*?Server=)papa(.*?)$' '${1}Prueba${2}'
 			"Test Replace Regexp",
 			args{"Server=papa papa", "-x", regexp.MustCompile(`^(.*?Server=)\bpapa\b(.*?)$`), `${1}Prueba${2}`},
 			"Server=Prueba papa",
