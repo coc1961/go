@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
 func main() {
 	if len(os.Args) < 4 {
-		fmt.Fprintf(os.Stderr, "\x1b[93;1mAgrega un texto antes o despues de una determinada linea\n")
-		fmt.Fprintf(os.Stderr, "el primer parametro es -a , -b , -r, -x (After/Before/Replace Line/Replace RexExp)\n")
+		color1, color2, color3 := "\x1b[93;1m", "\x1b[37;1m", "\x1b[0m"
+		if runtime.GOOS == "windows" {
+			color1, color2, color3 = "", "", ""
+		}
+		fmt.Fprintf(os.Stderr, color1+"Agrega un texto antes o despues de una determinada linea\n")
+		fmt.Fprintf(os.Stderr, "el primer parametro es -a , -b , -r, -x (After/Before/Replace Line/Replace Text RexExp)\n")
 		fmt.Fprintf(os.Stderr, "el segundo parametro es la expresion regular a buscar\n")
-		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n")
-		fmt.Fprintf(os.Stderr, "\n\x1b[37;1madds [-a,-b] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\x1b[0m\n\n")
+		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n\n")
+		fmt.Fprintf(os.Stderr, color2+"adds [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
 		return
 	}
 
