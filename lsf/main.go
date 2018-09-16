@@ -26,7 +26,7 @@ func main() {
 		if runtime.GOOS == "windows" {
 			color1, color2, color3 = "", "", ""
 		}
-		fmt.Fprintf(os.Stderr, color1+"Busca Archivos en un arbol de directorios\n")
+		fmt.Fprintf(os.Stderr, color1+"Busca y lista Archivos y Directorios en un arbol de directorios\n")
 		fmt.Fprintf(os.Stderr, "el primer parametro el el path en donde buscar\n")
 		fmt.Fprintf(os.Stderr, "el segundo parametro -d -f -a Imprmir (directory/file/all) (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el tercer parametro es una espresion regular para filtrar el listado (Opcional)\n")
