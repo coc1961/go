@@ -22,7 +22,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n")
 		fmt.Fprintf(os.Stderr, "\nEjemplo de reemplado exp regular\n")
 		fmt.Fprintf(os.Stderr, "\n"+`echo La Direccion del Server=serverIp y el host es serverIp | trx -x '^(.*?Server=)\bserverIp\b(.*?)$' '${1}192.168.99.100${2}'`)
-		fmt.Fprintf(os.Stderr, "\n\n"+color2+"trx [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
+		fmt.Fprintf(os.Stderr, "\n\n"+color2+"trx [-a,-b,-r,-x] \"regexp\" \"txt1\" ... \"txtn\"\n\n"+color3)
 		return
 	}
 
