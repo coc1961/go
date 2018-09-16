@@ -22,7 +22,7 @@ type params struct {
 
 func main() {
 	if len(os.Args) < 2 {
-		color1, color2, color3 := "\x1b[93;1m", "\x1b[37;1m", "\x1b[0m"
+		color1, color2, color3 := "\x1b[0;36m", "\x1b[37;1m", "\x1b[0m"
 		if runtime.GOOS == "windows" {
 			color1, color2, color3 = "", "", ""
 		}
