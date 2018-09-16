@@ -28,7 +28,7 @@ func main() {
 		}
 		fmt.Fprintf(os.Stderr, color1+"Busca Archivos en un arbol de directorios\n")
 		fmt.Fprintf(os.Stderr, "el primer parametro el el path en donde buscar\n")
-		fmt.Fprintf(os.Stderr, "el segundo parametro -d -f -a Imprmir (direcotory/file/all) (Opcional)\n")
+		fmt.Fprintf(os.Stderr, "el segundo parametro -d -f -a Imprmir (directory/file/all) (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el tercer parametro es una espresion regular para filtrar el listado (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el cuarto es el prefijo a agregar a cada nombre de archivo (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el quinto es el posfijo a agregar a cada nombre de archivo (Opcional)\n")
