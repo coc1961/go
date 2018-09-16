@@ -27,7 +27,7 @@ func Test_printLine(t *testing.T) {
 			// ${1}Prueba${2}
 			// Prueba Manual
 			//
-			// echo Server=papa papa | ./adds -x '^(.*?Server=)papa(.*?)$' '${1}Prueba${2}'
+			// echo Server=papa papa | ./trx -x '^(.*?Server=)\bpapa\b(.*?)$' '${1}Prueba${2}'
 			"Test Replace Regexp",
 			args{
 				"Server=papa papa",
