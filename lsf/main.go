@@ -27,8 +27,6 @@ func (par *listDir) process() {
 }
 
 func (par *listDir) readDir(pth string) {
-
-	fmt.Println(par)
 	if par.printDirs {
 		par.print(pth)
 	}
