@@ -1,5 +1,8 @@
 package main
 
+// Programa que permite listar directoios y archivos agregandole un prefijo o posfijo
+// permite filtrar y determinar si se listan archivos, directorios o ambos
+
 import (
 	"bufio"
 	"fmt"
@@ -10,16 +13,16 @@ import (
 	"runtime"
 )
 
-var fw = bufio.NewWriter(os.Stdout)
-
 type listDir struct {
-	root      string
-	filter    *regexp.Regexp
-	prefix    string
-	posfix    string
-	printFile bool
-	printDirs bool
-	readDirFn func(dirname string) ([]os.FileInfo, error)
+	root          string
+	filter        *regexp.Regexp
+	prefix        string
+	posfix        string
+	printFile     bool
+	printDirs     bool
+	readDirFn     func(dirname string) ([]os.FileInfo, error)
+	flushFn       func() error
+	writeStringfn func(s string) (int, error)
 }
 
 func (par *listDir) process() {
@@ -47,20 +50,22 @@ func (par *listDir) readDir(pth string) {
 }
 
 func (par *listDir) print(line string) {
-	defer fw.Flush()
+	defer par.flushFn()
 	var ok = true
 	if par.filter != nil {
 		ok = par.filter.MatchString(line)
 	}
 	if ok {
 		line := fmt.Sprintf("%s%s%s\n", par.prefix, line, par.posfix)
-		fw.WriteString(line)
-		fw.Flush()
+		par.writeStringfn(line)
+		par.flushFn()
 	}
 
 }
 
 func main() {
+	var fw = bufio.NewWriter(os.Stdout)
+
 	if len(os.Args) < 2 {
 		color1, color2, color3 := "\x1b[0;36m", "\x1b[37;1m", "\x1b[0m"
 		if runtime.GOOS == "windows" {
@@ -78,7 +83,7 @@ func main() {
 
 	pt := os.Args[1]
 
-	var par = &listDir{pt, nil, "", "", true, false, ioutil.ReadDir}
+	var par = &listDir{pt, nil, "", "", true, false, ioutil.ReadDir, fw.Flush, fw.WriteString}
 
 	if len(os.Args) > 2 {
 		option := os.Args[2]
