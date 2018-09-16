@@ -20,7 +20,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "el primer parametro es -a , -b , -r, -x (After/Before/Replace Line/Replace Text RexExp)\n")
 		fmt.Fprintf(os.Stderr, "el segundo parametro es la expresion regular a buscar\n")
 		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n\n")
-		fmt.Fprintf(os.Stderr, color2+"adds [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
+		fmt.Fprintf(os.Stderr, color2+"trx [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
 		return
 	}
 
