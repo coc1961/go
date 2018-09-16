@@ -12,7 +12,7 @@ import (
 
 var fw = bufio.NewWriter(os.Stdout)
 
-type params struct {
+type listDir struct {
 	root      string
 	filter    *regexp.Regexp
 	prefix    string
@@ -22,12 +22,13 @@ type params struct {
 	readDirFn func(dirname string) ([]os.FileInfo, error)
 }
 
-func (par *params) process() {
+func (par *listDir) process() {
 	par.readDir(par.root)
 }
 
-func (par *params) readDir(pth string) {
+func (par *listDir) readDir(pth string) {
 
+	fmt.Println(par)
 	if par.printDirs {
 		par.print(pth)
 	}
@@ -47,7 +48,7 @@ func (par *params) readDir(pth string) {
 	}
 }
 
-func (par *params) print(line string) {
+func (par *listDir) print(line string) {
 	defer fw.Flush()
 	var ok = true
 	if par.filter != nil {
@@ -79,7 +80,7 @@ func main() {
 
 	pt := os.Args[1]
 
-	var par = &params{pt, nil, "", "", true, false, ioutil.ReadDir}
+	var par = &listDir{pt, nil, "", "", true, false, ioutil.ReadDir}
 
 	if len(os.Args) > 2 {
 		option := os.Args[2]
