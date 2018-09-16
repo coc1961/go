@@ -13,11 +13,52 @@ import (
 var fw = bufio.NewWriter(os.Stdout)
 
 type params struct {
+	root      string
 	filter    *regexp.Regexp
 	prefix    string
 	posfix    string
 	printFile bool
 	printDirs bool
+	readDirFn func(dirname string) ([]os.FileInfo, error)
+}
+
+func (par *params) process() {
+	par.readDir(par.root)
+}
+
+func (par *params) readDir(pth string) {
+
+	if par.printDirs {
+		par.print(pth)
+	}
+
+	fi, err := par.readDirFn(pth)
+	if err != nil {
+		return
+	}
+	for _, f := range fi {
+		if f.IsDir() {
+			par.readDir(path.Join(pth, f.Name()))
+		} else {
+			if par.printFile {
+				par.print(path.Join(pth, f.Name()))
+			}
+		}
+	}
+}
+
+func (par *params) print(line string) {
+	defer fw.Flush()
+	var ok = true
+	if par.filter != nil {
+		ok = par.filter.MatchString(line)
+	}
+	if ok {
+		line := fmt.Sprintf("%s%s%s\n", par.prefix, line, par.posfix)
+		fw.WriteString(line)
+		fw.Flush()
+	}
+
 }
 
 func main() {
@@ -36,9 +77,9 @@ func main() {
 		return
 	}
 
-	var par = params{nil, "", "", true, false}
-
 	pt := os.Args[1]
+
+	var par = &params{pt, nil, "", "", true, false, ioutil.ReadDir}
 
 	if len(os.Args) > 2 {
 		option := os.Args[2]
@@ -65,40 +106,6 @@ func main() {
 		par.posfix = os.Args[5]
 	}
 
-	readDir(pt, &par)
-}
-
-func readDir(pth string, par *params) {
-
-	if par.printDirs {
-		print(pth, par)
-	}
-
-	fi, err := ioutil.ReadDir(pth)
-	if err != nil {
-		return
-	}
-	for _, f := range fi {
-		if f.IsDir() {
-			readDir(path.Join(pth, f.Name()), par)
-		} else {
-			if par.printFile {
-				print(path.Join(pth, f.Name()), par)
-			}
-		}
-	}
-}
-
-func print(line string, par *params) {
-	defer fw.Flush()
-	var ok = true
-	if par.filter != nil {
-		ok = par.filter.MatchString(line)
-	}
-	if ok {
-		line := fmt.Sprintf("%s%s%s\n", par.prefix, line, par.posfix)
-		fw.WriteString(line)
-		fw.Flush()
-	}
+	par.process()
 
 }
