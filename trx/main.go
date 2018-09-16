@@ -19,8 +19,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, color1+"Agrega un texto antes o despues de una determinada linea\n")
 		fmt.Fprintf(os.Stderr, "el primer parametro es -a , -b , -r, -x (After/Before/Replace Line/Replace Text RexExp)\n")
 		fmt.Fprintf(os.Stderr, "el segundo parametro es la expresion regular a buscar\n")
-		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n\n")
-		fmt.Fprintf(os.Stderr, color2+"trx [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
+		fmt.Fprintf(os.Stderr, "el tercero y sucesivos parametro es el texto a agregar\n")
+		fmt.Fprintf(os.Stderr, "\nEjemplo de reemplado exp regular\n")
+		fmt.Fprintf(os.Stderr, "\n"+`echo La Direccion del Server=serverIp y el host es serverIp | trx -x '^(.*?Server=)\bserverIp\b(.*?)$' '${1}192.168.99.100${2}'`)
+		fmt.Fprintf(os.Stderr, "\n\n"+color2+"trx [-a,-b,-r,-x] \"regexporigen\" \"textoagregado\" ... \"textoagregado_n\"\n\n"+color3)
 		return
 	}
 
