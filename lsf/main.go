@@ -71,7 +71,7 @@ func main() {
 func readDir(pth string, par *params) {
 
 	if par.printDirs {
-		print(pth+"/", par)
+		print(pth, par)
 	}
 
 	fi, err := ioutil.ReadDir(pth)
