@@ -31,7 +31,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "el segundo parametro -d -f -a Imprmir (directory/file/all) (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el tercer parametro es una espresion regular para filtrar el listado (Opcional)\n")
 		fmt.Fprintf(os.Stderr, "el cuarto es el prefijo a agregar a cada nombre de archivo (Opcional)\n")
-		fmt.Fprintf(os.Stderr, "el quinto es el posfijo a agregar a cada nombre de archivo (Opcional)\n")
+		fmt.Fprintf(os.Stderr, "el quinto es el posfijo a agregar a cada nombre de archivo (Opcional)\n ")
 		fmt.Fprintf(os.Stderr, "\n\n"+color2+"lsf ./ -f \".go$\" \"<\" \">\"\n\n"+color3)
 		return
 	}
