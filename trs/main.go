@@ -24,8 +24,8 @@ func main() {
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		result := strings.Replace(scanner.Text(), os.Args[1], os.Args[2], -1)
-		fmt.Println(result)
+		result := strings.Replace(scanner.Text()+"\n", strings.Replace(os.Args[1], "\\n", "\n", -1), os.Args[2], -1)
+		fmt.Print(result)
 	}
 
 }
