@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
+	"regexp"
 )
 
 func main() {
@@ -23,9 +23,26 @@ func main() {
 		return
 	}
 	scanner := bufio.NewScanner(os.Stdin)
+
+	_, err := regexp.Compile(os.Args[1])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "RegExp from Invalida")
+		return
+	}
+
+	// cont := 0
 	for scanner.Scan() {
-		result := strings.Replace(scanner.Text()+"\n", strings.Replace(os.Args[1], "\\n", "\n", -1), os.Args[2], -1)
+		// cont++
+		var line string
+		line = scanner.Text() + "\n"
+		result := replaceLine(line, os.Args[1], os.Args[2])
 		fmt.Print(result)
 	}
 
+}
+
+func replaceLine(line string, from string, to string) string {
+	rfrom, _ := regexp.Compile(from)
+	ret := rfrom.ReplaceAllString(line, to)
+	return ret
 }

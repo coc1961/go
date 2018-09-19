@@ -81,6 +81,10 @@ func main() {
 		return
 	}
 
+	// var n = flag.String("n", " ", "Omitir tailing")
+	// var sep = flag.String("s", " ", "Separador")
+	// flag.Parse()
+
 	pt := os.Args[1]
 
 	var par = &listDir{pt, nil, "", "", true, false, ioutil.ReadDir, fw.Flush, fw.WriteString}
