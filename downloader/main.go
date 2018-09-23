@@ -83,13 +83,21 @@ func main() {
 	_ = chunkSize
 
 	wg.Wait()
-
 	for _, v := range pd {
-		io.Copy(out, v.out)
 		defer func(f *os.File) {
-			f.Close()
-			os.Remove(f.Name())
+			if f != nil {
+				f.Close()
+				os.Remove(f.Name())
+			}
 		}(v.out)
+	}
+	for _, v := range pd {
+		if v.err != nil {
+			log.Fatalln(v.err)
+			os.Remove(out.Name())
+			return
+		}
+		io.Copy(out, v.out)
 	}
 }
 
@@ -99,26 +107,42 @@ type partialDownload struct {
 	i           int64
 	wg          *sync.WaitGroup
 	out         *os.File
+	err         error
 }
 
 func createPartialDownload(resourceURL *url.URL, rangeHeader string, i int64, wg *sync.WaitGroup) *partialDownload {
-	return &partialDownload{resourceURL, rangeHeader, i, wg, nil}
+	return &partialDownload{resourceURL, rangeHeader, i, wg, nil, nil}
 }
 
 func (p *partialDownload) Download() {
 	defer p.wg.Done()
-	req, _ := http.NewRequest("GET", p.resourceURL.String(), nil)
+	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
+	if error != nil {
+		p.err = error
+		return
+	}
 	req.Header.Add("Range", p.rangeHeader)
 	var client http.Client
-	resp, _ := client.Do(req)
+	resp, error := client.Do(req)
+	if error != nil {
+		p.err = error
+		return
+	}
 	fileName := fmt.Sprintf("%d-output.bin", p.i)
 	os.Remove(fileName)
-	out, _ := os.Create(fileName)
+	out, error := os.Create(fileName)
+	if error != nil {
+		p.err = error
+		return
+	}
 	p.out = out
 	defer func(fileName string) {
 		out.Close()
 		p.out, _ = os.Open(fileName)
 	}(fileName)
 
-	_, _ = io.Copy(out, resp.Body)
+	_, error = io.Copy(out, resp.Body)
+	if error != nil {
+		p.err = error
+	}
 }
