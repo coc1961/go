@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 // BUG(carlos): Manage Errors!
@@ -53,7 +54,9 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	fmt.Println(contentLength)
+	//	fmt.Println(contentLength)
+
+	pba = make([]*progressReader, 0)
 
 	chunkSize := contentLength / workers
 
@@ -71,12 +74,23 @@ func main() {
 		rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
 		_ = rangeHeader
 
-		fmt.Println(rangeHeader)
-		tmp := createPartialDownload(resourceURL, rangeHeader, i, &wg)
+		//		fmt.Println(rangeHeader)
+		tmp := createPartialDownload(resourceURL, rangeHeader, i, &wg, chunkEnd-chunkStart)
 		pd = append(pd, tmp)
 		go tmp.Download()
 	}
 
+	go func(pd []*partialDownload) {
+		for {
+			fmt.Print("\rProgress [ ")
+			for _, v := range pba {
+				fmt.Print(v.pos / (v.len / 100))
+				fmt.Print("% ")
+			}
+			fmt.Print("]")
+			time.Sleep(time.Millisecond * 20)
+		}
+	}(pd)
 	_ = workers
 	_ = resourceURL
 	_ = out
@@ -99,7 +113,11 @@ func main() {
 		}
 		io.Copy(out, v.out)
 	}
+	time.Sleep(time.Millisecond * 20)
+
 }
+
+var pba []*progressReader
 
 type partialDownload struct {
 	resourceURL *url.URL
@@ -108,10 +126,11 @@ type partialDownload struct {
 	wg          *sync.WaitGroup
 	out         *os.File
 	err         error
+	len         int64
 }
 
-func createPartialDownload(resourceURL *url.URL, rangeHeader string, i int64, wg *sync.WaitGroup) *partialDownload {
-	return &partialDownload{resourceURL, rangeHeader, i, wg, nil, nil}
+func createPartialDownload(resourceURL *url.URL, rangeHeader string, i int64, wg *sync.WaitGroup, len int64) *partialDownload {
+	return &partialDownload{resourceURL, rangeHeader, i, wg, nil, nil, len}
 }
 
 func (p *partialDownload) Download() {
@@ -141,8 +160,27 @@ func (p *partialDownload) Download() {
 		p.out, _ = os.Open(fileName)
 	}(fileName)
 
-	_, error = io.Copy(out, resp.Body)
+	wrapReader := &progressReader{&resp.Body, p.len, 0}
+
+	pba = append(pba, wrapReader)
+	_, error = io.Copy(out, wrapReader)
 	if error != nil {
 		p.err = error
 	}
+}
+
+type progressReader struct {
+	reader *io.ReadCloser
+	len    int64
+	pos    int64
+}
+
+func (r *progressReader) Read(p []byte) (n int, err error) {
+	rr := *(r.reader)
+	lei, err := rr.Read(p)
+	r.pos += int64(lei)
+	// fmt.Print("\r[")
+	// fmt.Print(r.pos / (r.len / 100))
+	// fmt.Print("]")
+	return lei, err
 }
