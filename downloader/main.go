@@ -35,8 +35,6 @@ func main() {
 		log.Fatalf("error opening file for writing: %v", err)
 	}
 
-	go out.Close()
-
 	res, err := http.Head(resourceURL.String())
 	if err != nil {
 		log.Fatalf("error requesting HEAD of file: %v", err)
@@ -94,6 +92,8 @@ func main() {
 
 	wg.Wait()
 
+	out.Close()
+
 	for _, v := range pd {
 		if v.out != nil {
 			v.out.Close()
@@ -101,6 +101,7 @@ func main() {
 	}
 	for _, v := range pd {
 		if v.err != nil {
+			go os.Remove(out.Name())
 			log.Fatal(v.err)
 		}
 	}
