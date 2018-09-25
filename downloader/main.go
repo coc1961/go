@@ -80,7 +80,6 @@ func main() {
 		go func() {
 			// Comienzo Descarga
 			tmp.Download(&progressBarArray, &wg)
-
 		}()
 	}
 
