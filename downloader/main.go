@@ -75,7 +75,6 @@ func main() {
 
 		rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
 
-		//		fmt.Println(rangeHeader)
 		tmp := createPartialDownload(resourceURL, rangeHeader, i, &wg, chunkEnd-chunkStart, out, chunkStart)
 		pd = append(pd, tmp)
 		go tmp.Download()
