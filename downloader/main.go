@@ -71,9 +71,9 @@ func main() {
 			chunkEnd = contentLength
 		}
 
-		tmp := createPartialDownload(resourceURL, &wg, chunkStart, chunkEnd, out)
+		tmp := createPartialDownload(resourceURL, chunkStart, chunkEnd, out)
 		pd = append(pd, tmp)
-		go tmp.Download()
+		go tmp.Download(&wg)
 	}
 
 	go func() {
@@ -111,20 +111,19 @@ func main() {
 type partialDownload struct {
 	resourceURL *url.URL
 	rangeHeader string
-	wg          *sync.WaitGroup
 	out         *os.File
 	err         error
 	len         int64
 	pos         int64
 }
 
-func createPartialDownload(resourceURL *url.URL, wg *sync.WaitGroup, chunkStart int64, chunkEnd int64, out *os.File) *partialDownload {
+func createPartialDownload(resourceURL *url.URL, chunkStart int64, chunkEnd int64, out *os.File) *partialDownload {
 	rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
-	return &partialDownload{resourceURL, rangeHeader, wg, out, nil, chunkEnd - chunkStart, chunkStart}
+	return &partialDownload{resourceURL, rangeHeader, out, nil, chunkEnd - chunkStart, chunkStart}
 }
 
-func (p *partialDownload) Download() {
-	defer p.wg.Done()
+func (p *partialDownload) Download(wg *sync.WaitGroup) {
+	defer wg.Done()
 	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
 	if error != nil {
 		p.err = error
