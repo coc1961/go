@@ -71,9 +71,7 @@ func main() {
 			chunkEnd = contentLength
 		}
 
-		rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
-
-		tmp := createPartialDownload(resourceURL, rangeHeader, &wg, chunkEnd-chunkStart, out, chunkStart)
+		tmp := createPartialDownload(resourceURL, &wg, chunkStart, chunkEnd, out)
 		pd = append(pd, tmp)
 		go tmp.Download()
 	}
@@ -86,7 +84,7 @@ func main() {
 				fmt.Print("% ")
 			}
 			fmt.Print("]")
-			time.Sleep(time.Millisecond * 20)
+			time.Sleep(time.Millisecond * 10)
 		}
 	}()
 
@@ -105,12 +103,10 @@ func main() {
 			log.Fatal(v.err)
 		}
 	}
-	time.Sleep(time.Millisecond * 20)
+	time.Sleep(time.Millisecond * 10)
 	fmt.Println("\nEnd...")
 
 }
-
-var pba []*progressReader
 
 type partialDownload struct {
 	resourceURL *url.URL
@@ -122,8 +118,9 @@ type partialDownload struct {
 	pos         int64
 }
 
-func createPartialDownload(resourceURL *url.URL, rangeHeader string, wg *sync.WaitGroup, len int64, out *os.File, pos int64) *partialDownload {
-	return &partialDownload{resourceURL, rangeHeader, wg, out, nil, len, pos}
+func createPartialDownload(resourceURL *url.URL, wg *sync.WaitGroup, chunkStart int64, chunkEnd int64, out *os.File) *partialDownload {
+	rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
+	return &partialDownload{resourceURL, rangeHeader, wg, out, nil, chunkEnd - chunkStart, chunkStart}
 }
 
 func (p *partialDownload) Download() {
@@ -150,13 +147,19 @@ func (p *partialDownload) Download() {
 
 	p.out.Seek(p.pos, os.SEEK_SET)
 
-	wrapReader := &progressReader{&resp.Body, p.len, 0}
+	wrapReader := createProgressReader(&resp.Body, p.len)
 
 	pba = append(pba, wrapReader)
 	_, error = io.Copy(p.out, wrapReader)
 	if error != nil {
 		p.err = error
 	}
+}
+
+var pba []*progressReader
+
+func createProgressReader(reader *io.ReadCloser, len int64) *progressReader {
+	return &progressReader{reader, len, 0}
 }
 
 type progressReader struct {
