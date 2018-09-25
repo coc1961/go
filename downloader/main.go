@@ -10,10 +10,17 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 // BUG(carlos): Manage Errors!
 func main() {
+
+	// Inicio de operacion
+	start := time.Now()
+
 	if len(os.Args) != 4 {
 		log.Printf("usage: %s [concurrency] [url] [output]", os.Args[0])
 		return
@@ -115,9 +122,11 @@ func main() {
 		}
 	}
 	time.Sleep(time.Millisecond * 10)
-	//End!
-	fmt.Println("\nEnd...")
 
+	//End!
+	elapsed := time.Since(start)
+	p := message.NewPrinter(language.English)
+	p.Printf("\nProcess %d Bytes in %d seconds\n", contentLength, int(elapsed.Seconds()))
 }
 
 // Estructura de descarga parcial
