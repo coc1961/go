@@ -106,6 +106,7 @@ func main() {
 		}
 	}
 	time.Sleep(time.Millisecond * 20)
+	fmt.Println("\nFin")
 
 }
 
