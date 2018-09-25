@@ -30,10 +30,12 @@ func main() {
 	}
 
 	os.Remove(os.Args[3])
-	out, err := os.OpenFile(os.Args[3], os.O_RDWR|os.O_CREATE|os.O_EXCL, os.ModePerm)
+	out, err := os.OpenFile(os.Args[3], os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		log.Fatalf("error opening file for writing: %v", err)
 	}
+
+	go out.Close()
 
 	res, err := http.Head(resourceURL.String())
 	if err != nil {
@@ -54,9 +56,9 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	//	fmt.Println(contentLength)
-
 	pba = make([]*progressReader, 0)
+
+	out.Truncate(contentLength)
 
 	chunkSize := contentLength / workers
 
@@ -72,10 +74,9 @@ func main() {
 		}
 
 		rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
-		_ = rangeHeader
 
 		//		fmt.Println(rangeHeader)
-		tmp := createPartialDownload(resourceURL, rangeHeader, i, &wg, chunkEnd-chunkStart)
+		tmp := createPartialDownload(resourceURL, rangeHeader, i, &wg, chunkEnd-chunkStart, out, chunkStart)
 		pd = append(pd, tmp)
 		go tmp.Download()
 	}
@@ -91,27 +92,18 @@ func main() {
 			time.Sleep(time.Millisecond * 20)
 		}
 	}(pd)
-	_ = workers
-	_ = resourceURL
-	_ = out
-	_ = chunkSize
 
 	wg.Wait()
+
 	for _, v := range pd {
-		defer func(f *os.File) {
-			if f != nil {
-				f.Close()
-				os.Remove(f.Name())
-			}
-		}(v.out)
+		if v.out != nil {
+			v.out.Close()
+		}
 	}
 	for _, v := range pd {
 		if v.err != nil {
-			log.Fatalln(v.err)
-			os.Remove(out.Name())
-			return
+			log.Fatal(v.err)
 		}
-		io.Copy(out, v.out)
 	}
 	time.Sleep(time.Millisecond * 20)
 
@@ -127,10 +119,11 @@ type partialDownload struct {
 	out         *os.File
 	err         error
 	len         int64
+	pos         int64
 }
 
-func createPartialDownload(resourceURL *url.URL, rangeHeader string, i int64, wg *sync.WaitGroup, len int64) *partialDownload {
-	return &partialDownload{resourceURL, rangeHeader, i, wg, nil, nil, len}
+func createPartialDownload(resourceURL *url.URL, rangeHeader string, i int64, wg *sync.WaitGroup, len int64, out *os.File, pos int64) *partialDownload {
+	return &partialDownload{resourceURL, rangeHeader, i, wg, out, nil, len, pos}
 }
 
 func (p *partialDownload) Download() {
@@ -147,23 +140,20 @@ func (p *partialDownload) Download() {
 		p.err = error
 		return
 	}
-	fileName := fmt.Sprintf("%d-output.bin", p.i)
-	os.Remove(fileName)
-	out, error := os.Create(fileName)
-	if error != nil {
-		p.err = error
+
+	out, err := os.OpenFile(p.out.Name(), os.O_RDWR, os.ModePerm)
+	if err != nil {
+		p.err = err
 		return
 	}
 	p.out = out
-	defer func(fileName string) {
-		out.Close()
-		p.out, _ = os.Open(fileName)
-	}(fileName)
+
+	p.out.Seek(p.pos, os.SEEK_SET)
 
 	wrapReader := &progressReader{&resp.Body, p.len, 0}
 
 	pba = append(pba, wrapReader)
-	_, error = io.Copy(out, wrapReader)
+	_, error = io.Copy(p.out, wrapReader)
 	if error != nil {
 		p.err = error
 	}
@@ -179,8 +169,5 @@ func (r *progressReader) Read(p []byte) (n int, err error) {
 	rr := *(r.reader)
 	lei, err := rr.Read(p)
 	r.pos += int64(lei)
-	// fmt.Print("\r[")
-	// fmt.Print(r.pos / (r.len / 100))
-	// fmt.Print("]")
 	return lei, err
 }
