@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var progressBarArray []*progressReader
-
 // BUG(carlos): Manage Errors!
 func main() {
 	if len(os.Args) != 4 {
@@ -57,7 +55,7 @@ func main() {
 	}
 
 	// Inicializo Variables
-	progressBarArray = make([]*progressReader, 0)
+	progressBarArray := make([]*progressReader, 0)
 	partialDownloadArray := make([]*partialDownload, 0)
 
 	// Reservo Espacio en el Archivo de Salida
@@ -79,8 +77,11 @@ func main() {
 		tmp := createPartialDownload(resourceURL, chunkStart, chunkEnd, out)
 		partialDownloadArray = append(partialDownloadArray, tmp)
 
-		// Comienzo Descarga
-		go tmp.Download(&wg)
+		go func() {
+			// Comienzo Descarga
+			tmp.Download(&progressBarArray, &wg)
+
+		}()
 	}
 
 	// Muestro Barra de Progreso
@@ -137,7 +138,7 @@ func createPartialDownload(resourceURL *url.URL, chunkStart int64, chunkEnd int6
 }
 
 // Descarga Parcial
-func (p *partialDownload) Download(wg *sync.WaitGroup) {
+func (p *partialDownload) Download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
 	defer wg.Done()
 	// Request
 	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
@@ -170,13 +171,14 @@ func (p *partialDownload) Download(wg *sync.WaitGroup) {
 	wrapReader := createProgressReader(&resp.Body, p.len)
 
 	// Agrego al array para desplegar el porc de descarga
-	progressBarArray = append(progressBarArray, wrapReader)
+	*progressArray = append(*progressArray, wrapReader)
 
 	// Descargo!
 	_, error = io.Copy(p.out, wrapReader)
 	if error != nil {
 		p.err = error
 	}
+	return
 }
 
 // Creo el objeto para alimentar la barra de progreso
