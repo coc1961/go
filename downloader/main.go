@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var progressBarrArray []*progressReader
+
 // BUG(carlos): Manage Errors!
 func main() {
 	if len(os.Args) != 4 {
@@ -54,7 +56,8 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	pba = make([]*progressReader, 0)
+	progressBarrArray = make([]*progressReader, 0)
+	partialDownloadArray := make([]*partialDownload, 0)
 
 	out.Truncate(contentLength)
 
@@ -63,8 +66,6 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(int(workers))
 
-	pd := make([]*partialDownload, 0)
-
 	for i := int64(0); i < workers; i++ {
 		chunkStart, chunkEnd := chunkSize*i, (chunkSize*i)+chunkSize-1
 		if i+1 == workers {
@@ -72,14 +73,14 @@ func main() {
 		}
 
 		tmp := createPartialDownload(resourceURL, chunkStart, chunkEnd, out)
-		pd = append(pd, tmp)
+		partialDownloadArray = append(partialDownloadArray, tmp)
 		go tmp.Download(&wg)
 	}
 
 	go func() {
 		for {
 			fmt.Print("\rProgress [ ")
-			for _, v := range pba {
+			for _, v := range progressBarrArray {
 				fmt.Print(v.pos / (v.len / 100))
 				fmt.Print("% ")
 			}
@@ -92,12 +93,12 @@ func main() {
 
 	out.Close()
 
-	for _, v := range pd {
+	for _, v := range partialDownloadArray {
 		if v.out != nil {
 			v.out.Close()
 		}
 	}
-	for _, v := range pd {
+	for _, v := range partialDownloadArray {
 		if v.err != nil {
 			go os.Remove(out.Name())
 			log.Fatal(v.err)
@@ -148,14 +149,12 @@ func (p *partialDownload) Download(wg *sync.WaitGroup) {
 
 	wrapReader := createProgressReader(&resp.Body, p.len)
 
-	pba = append(pba, wrapReader)
+	progressBarrArray = append(progressBarrArray, wrapReader)
 	_, error = io.Copy(p.out, wrapReader)
 	if error != nil {
 		p.err = error
 	}
 }
-
-var pba []*progressReader
 
 func createProgressReader(reader *io.ReadCloser, len int64) *progressReader {
 	return &progressReader{reader, len, 0}
