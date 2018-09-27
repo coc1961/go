@@ -1,5 +1,14 @@
 package lib
 
+// Download File, permite descargar un archivo pedazos con varios hilos simultaneos
+//
+// Utilzando la funcion
+//
+// func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener func(status []*ProgressReader)) {
+//
+// recibe la url, la cantidad de hilos, el archhivo de salida, y una funcion que recibe el status con el progreso
+// de la descarga
+
 import (
 	"fmt"
 	"io"
