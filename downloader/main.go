@@ -69,6 +69,7 @@ func main() {
 	p.Printf("\nProcess %d Bytes in %d seconds\n", contentLength, int(elapsed.Seconds()))
 }
 
+// Funcion que muestra el de Progreso de la descarga
 func progress(status []*lib.ProgressReader) {
 	fmt.Print("\rProgress [ ")
 	for _, v := range status {
@@ -78,10 +79,3 @@ func progress(status []*lib.ProgressReader) {
 	fmt.Print("]")
 
 }
-
-// fmt.Print("\rProgress [ ")
-// for _, v := range progressBarArray {
-// 	fmt.Print(v.pos / (v.len / 100))
-// 	fmt.Print("% ")
-// }
-// fmt.Print("]")

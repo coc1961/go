@@ -84,7 +84,7 @@ type ProgressReader struct {
 	pos    int64          // bytes procesados
 }
 
-//Progress todo
+//Progress Retorna al porcentaje de la descarga realizada
 func (r *ProgressReader) Progress() int64 {
 	return int64(r.pos / (r.len / 100))
 }
