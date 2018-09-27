@@ -152,16 +152,7 @@ func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener fu
 	if listener != nil {
 		go func() {
 			for {
-				(listener)(progressBarArray)
-
-				//.Progress()
-
-				// fmt.Print("\rProgress [ ")
-				// for _, v := range progressBarArray {
-				// 	fmt.Print(v.pos / (v.len / 100))
-				// 	fmt.Print("% ")
-				// }
-				// fmt.Print("]")
+				listener(progressBarArray)
 				time.Sleep(time.Millisecond * 10)
 			}
 		}()
