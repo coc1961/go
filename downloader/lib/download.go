@@ -18,8 +18,8 @@ type partialDownload struct {
 	rangeHeader string   // bytes a descargar
 	out         *os.File // archivo de salida
 	err         error    // error ?
-	len         int64    // bytes a descargar
-	pos         int64    // posicion de inicio
+	chunkSize   int64    // bytes a descargar
+	chunkStart  int64    // posicion de inicio
 }
 
 // Creo partialDownload
@@ -55,11 +55,11 @@ func (p *partialDownload) Download(progressArray *[]*ProgressReader, wg *sync.Wa
 	p.out = out
 
 	// Me posiciono en la posicion en donde debo descargar
-	p.out.Seek(p.pos, os.SEEK_SET)
+	p.out.Seek(p.chunkStart, os.SEEK_SET)
 
 	// Creo un emboltorio de reader para que setee valores
 	// de progreso de descarga para alimentar la barra de %
-	wrapReader := createProgressReader(&resp.Body, p.len)
+	wrapReader := createProgressReader(&resp.Body, p.chunkSize)
 
 	// Agrego al array para desplegar el porc de descarga
 	*progressArray = append(*progressArray, wrapReader)
