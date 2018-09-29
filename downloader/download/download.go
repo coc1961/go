@@ -21,6 +21,8 @@ import (
 	"time"
 )
 
+const sleepTipme time.Duration = 500
+
 // Estructura de descarga parcial
 type partialDownload struct {
 	resourceURL *url.URL // Url de descarga
@@ -172,7 +174,7 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 					statusArray[i] = value
 				}
 				listener(statusArray)
-				time.Sleep(time.Millisecond * 10)
+				time.Sleep(time.Millisecond * sleepTipme)
 			}
 		}()
 	}
@@ -195,6 +197,6 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 			log.Fatal(v.err)
 		}
 	}
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * sleepTipme)
 
 }
