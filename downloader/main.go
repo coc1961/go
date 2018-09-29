@@ -18,6 +18,7 @@ import (
 
 // BUG(carlos): Manage Errors!
 func main() {
+	var pointerVerbose = flag.Bool("v", false, "show progress")
 	var pointerWorkers = flag.Int64("n", 0, "number of concurent downloads")
 	var pointerSUrl = flag.String("url", "", "download file url")
 	var pointerOutputFile = flag.String("o", "", "output file")
@@ -30,6 +31,7 @@ func main() {
 		return
 	}
 
+	verbose := *pointerVerbose
 	workers := *pointerWorkers
 	surl := *pointerSUrl
 	outputFile := *pointerOutputFile
@@ -68,12 +70,18 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	download.File(resourceURL, workers, out, progress)
+	if verbose {
+		download.File(resourceURL, workers, out, progress)
+	} else {
+		download.File(resourceURL, workers, out, nil)
+	}
 
 	//End!
 	elapsed := time.Since(start)
 	p := message.NewPrinter(language.English)
-	p.Printf("\nProcess %d Bytes in %d seconds\n", contentLength, int(elapsed.Seconds()))
+	if verbose {
+		p.Printf("\nProcess %d Bytes in %d seconds\n", contentLength, int(elapsed.Seconds()))
+	}
 }
 
 // Funcion que muestra el de Progreso de la descarga
