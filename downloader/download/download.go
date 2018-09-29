@@ -91,7 +91,7 @@ type Status interface {
 	Progress() int64
 }
 
-//progressReader  Enboltorio de reader que guarda el % de descarga
+//progressReader  Envoltorio de reader que guarda el % de descarga
 type progressReader struct {
 	reader *io.ReadCloser // Reader original
 	len    int64          // total a descargar
@@ -166,6 +166,7 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 	if listener != nil {
 		go func() {
 			for {
+				// Convierto en Objetos Status
 				statusArray := make([]Status, len(progressBarArray))
 				for i, value := range progressBarArray {
 					statusArray[i] = value
