@@ -68,7 +68,7 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	download.DownloadFile(resourceURL, workers, out, progress)
+	download.File(resourceURL, workers, out, progress)
 
 	//End!
 	elapsed := time.Since(start)
@@ -77,7 +77,7 @@ func main() {
 }
 
 // Funcion que muestra el de Progreso de la descarga
-func progress(status []*download.ProgressReader) {
+func progress(status []download.Status) {
 	fmt.Print("\rProgress [ ")
 	for _, v := range status {
 		fmt.Print(v.Progress())

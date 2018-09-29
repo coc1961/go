@@ -4,7 +4,7 @@ package download
 //
 // Utilzando la funcion
 //
-// func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener func(status []*ProgressReader)) {
+// func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener func(status []*progressReader)) {
 //
 // recibe la url, la cantidad de hilos, el archhivo de salida, y una funcion que recibe el status con el progreso
 // de la descarga
@@ -38,7 +38,7 @@ func createPartialDownload(resourceURL *url.URL, chunkStart int64, chunkEnd int6
 }
 
 // Descarga Parcial
-func (p *partialDownload) Download(progressArray *[]*ProgressReader, wg *sync.WaitGroup) {
+func (p *partialDownload) Download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
 	defer wg.Done()
 	// Request
 	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
@@ -68,7 +68,7 @@ func (p *partialDownload) Download(progressArray *[]*ProgressReader, wg *sync.Wa
 
 	// Creo un emboltorio de reader para que setee valores
 	// de progreso de descarga para alimentar la barra de %
-	wrapReader := createProgressReader(&resp.Body, p.chunkSize)
+	wrapReader := createprogressReader(&resp.Body, p.chunkSize)
 
 	// Agrego al array para desplegar el porc de descarga
 	*progressArray = append(*progressArray, wrapReader)
@@ -82,32 +82,37 @@ func (p *partialDownload) Download(progressArray *[]*ProgressReader, wg *sync.Wa
 }
 
 // Creo el objeto para alimentar la barra de progreso
-func createProgressReader(reader *io.ReadCloser, len int64) *ProgressReader {
-	return &ProgressReader{reader, len, 0}
+func createprogressReader(reader *io.ReadCloser, len int64) *progressReader {
+	return &progressReader{reader, len, 0}
 }
 
-//ProgressReader  Enboltorio de reader que guarda el % de descarga
-type ProgressReader struct {
+// Status chunck download status
+type Status interface {
+	Progress() int64
+}
+
+//progressReader  Enboltorio de reader que guarda el % de descarga
+type progressReader struct {
 	reader *io.ReadCloser // Reader original
 	len    int64          // total a descargar
 	pos    int64          // bytes procesados
 }
 
 //Progress Retorna al porcentaje de la descarga realizada
-func (r *ProgressReader) Progress() int64 {
+func (r *progressReader) Progress() int64 {
 	return int64(r.pos / (r.len / 100))
 }
 
 // Actualizo % de descarga y realizo la lectura real
-func (r *ProgressReader) Read(p []byte) (n int, err error) {
+func (r *progressReader) Read(p []byte) (n int, err error) {
 	rr := *(r.reader)
 	lei, err := rr.Read(p)
 	r.pos += int64(lei)
 	return lei, err
 }
 
-// DownloadFile descarga un archivo en partes procesadas en procesos simultaneos
-func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener func(status []*ProgressReader)) {
+// File descarga un archivo en partes procesadas en procesos simultaneos
+func File(resourceURL *url.URL, workers int64, out *os.File, listener func(status []Status)) {
 
 	res, err := http.Head(resourceURL.String())
 	if err != nil {
@@ -129,7 +134,7 @@ func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener fu
 	}
 
 	// Inicializo Variables
-	progressBarArray := make([]*ProgressReader, 0)
+	progressBarArray := make([]*progressReader, 0)
 	partialDownloadArray := make([]*partialDownload, 0)
 
 	// Reservo Espacio en el Archivo de Salida
@@ -161,7 +166,13 @@ func DownloadFile(resourceURL *url.URL, workers int64, out *os.File, listener fu
 	if listener != nil {
 		go func() {
 			for {
-				listener(progressBarArray)
+
+				//var st []Status
+				statusArray := make([]Status, len(progressBarArray))
+				for i, v := range progressBarArray {
+					statusArray[i] = v
+				}
+				listener(statusArray)
 				time.Sleep(time.Millisecond * 10)
 			}
 		}()
