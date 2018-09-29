@@ -166,11 +166,9 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 	if listener != nil {
 		go func() {
 			for {
-
-				//var st []Status
 				statusArray := make([]Status, len(progressBarArray))
-				for i, v := range progressBarArray {
-					statusArray[i] = v
+				for i, value := range progressBarArray {
+					statusArray[i] = value
 				}
 				listener(statusArray)
 				time.Sleep(time.Millisecond * 10)
