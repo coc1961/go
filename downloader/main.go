@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,27 +18,47 @@ import (
 
 // BUG(carlos): Manage Errors!
 func main() {
+	var pointerWorkers = flag.Int64("n", 0, "number of concurent downloads")
+	var pointerSUrl = flag.String("url", "", "download file url")
+	var pointerOutputFile = flag.String("o", "", "output file")
 
-	// Inicio de operacion
-	start := time.Now()
+	flag.Parse()
 
-	if len(os.Args) != 4 {
-		log.Printf("usage: %s [concurrency] [url] [output]", os.Args[0])
+	if *pointerWorkers < 1 || *pointerSUrl == "" || *pointerOutputFile == "" {
+		flag.Usage()
+		os.Exit(1)
 		return
 	}
 
-	workers, err := strconv.ParseInt(os.Args[1], 10, 64)
-	if err != nil {
-		log.Fatalf("error parsing concurrency param: %v", err)
-	}
+	workers := *pointerWorkers
+	surl := *pointerSUrl
+	outputFile := *pointerOutputFile
 
-	resourceURL, err := url.Parse(os.Args[2])
+	resourceURL, err := url.Parse(surl)
 	if err != nil {
 		log.Fatalf("error parsing url param: %v", err)
 	}
 
-	os.Remove(os.Args[3])
-	out, err := os.OpenFile(os.Args[3], os.O_RDWR|os.O_CREATE, os.ModePerm)
+	// Inicio de operacion
+	start := time.Now()
+
+	// if len(os.Args) != 4 {
+	// 	log.Printf("usage: %s [concurrency] [url] [output]", os.Args[0])
+	// 	return
+	// }
+
+	// workers, err := strconv.ParseInt(os.Args[1], 10, 64)
+	// if err != nil {
+	// 	log.Fatalf("error parsing concurrency param: %v", err)
+	// }
+
+	// resourceURL, err := url.Parse(os.Args[2])
+	// if err != nil {
+	// 	log.Fatalf("error parsing url param: %v", err)
+	// }
+
+	os.Remove(outputFile)
+	out, err := os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		log.Fatalf("error opening file for writing: %v", err)
 	}
