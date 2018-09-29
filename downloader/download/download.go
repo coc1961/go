@@ -1,4 +1,4 @@
-package lib
+package download
 
 // Download File, permite descargar un archivo pedazos con varios hilos simultaneos
 //

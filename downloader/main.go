@@ -13,7 +13,7 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
-	"github.com/coc1961/go/downloader/lib"
+	"github.com/coc1961/go/downloader/download"
 )
 
 // BUG(carlos): Manage Errors!
@@ -68,7 +68,7 @@ func main() {
 		log.Fatalf("remote server content-length is invalid")
 	}
 
-	lib.DownloadFile(resourceURL, workers, out, progress)
+	download.DownloadFile(resourceURL, workers, out, progress)
 
 	//End!
 	elapsed := time.Since(start)
@@ -77,7 +77,7 @@ func main() {
 }
 
 // Funcion que muestra el de Progreso de la descarga
-func progress(status []*lib.ProgressReader) {
+func progress(status []*download.ProgressReader) {
 	fmt.Print("\rProgress [ ")
 	for _, v := range status {
 		fmt.Print(v.Progress())
