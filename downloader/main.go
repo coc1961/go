@@ -18,10 +18,10 @@ import (
 
 // BUG(carlos): Manage Errors!
 func main() {
-	var pointerVerbose = flag.Bool("v", false, "show progress")
-	var pointerWorkers = flag.Int64("n", 0, "number of concurent downloads")
-	var pointerSUrl = flag.String("url", "", "download file url")
-	var pointerOutputFile = flag.String("o", "", "output file")
+	var pointerVerbose = flag.Bool("v", false, "show progress (Optional)")
+	var pointerWorkers = flag.Int64("n", 2, "number of concurent downloads (Optional)")
+	var pointerSUrl = flag.String("url", "", "download file url (required)")
+	var pointerOutputFile = flag.String("o", "", "output file (required)")
 
 	flag.Parse()
 
