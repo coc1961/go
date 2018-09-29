@@ -42,26 +42,12 @@ func main() {
 	// Inicio de operacion
 	start := time.Now()
 
-	// if len(os.Args) != 4 {
-	// 	log.Printf("usage: %s [concurrency] [url] [output]", os.Args[0])
-	// 	return
-	// }
-
-	// workers, err := strconv.ParseInt(os.Args[1], 10, 64)
-	// if err != nil {
-	// 	log.Fatalf("error parsing concurrency param: %v", err)
-	// }
-
-	// resourceURL, err := url.Parse(os.Args[2])
-	// if err != nil {
-	// 	log.Fatalf("error parsing url param: %v", err)
-	// }
-
 	os.Remove(outputFile)
 	out, err := os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		log.Fatalf("error opening file for writing: %v", err)
 	}
+	defer out.Close()
 
 	res, err := http.Head(resourceURL.String())
 	if err != nil {
