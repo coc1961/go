@@ -155,11 +155,13 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 			chunkEnd = contentLength
 		}
 
+		// creo un object de descarga parcial con
+		// url del archivo, byte de inicio de la descarga, byte de fin, archivo de salida
 		tmp := createPartialDownload(resourceURL, chunkStart, chunkEnd, out)
 		partialDownloadArray = append(partialDownloadArray, tmp)
 
 		go func() {
-			// Comienzo Descarga
+			// Comienzo Descarga parcial
 			tmp.Download(&progressBarArray, &wg)
 		}()
 	}
