@@ -1,5 +1,7 @@
 docker run -d --rm --name mycntlm -e CNTLM_PROXY="proxy:8100" -e CNTLM_NO_PROXY=* -p 8888:3128  bachp/cntlm 
 
+#docker logs -f mycntlm &
+
 export http_proxy=http://127.0.0.1:8888
 
 export GOMAXPROCS=8
