@@ -39,18 +39,43 @@ func createPartialDownload(resourceURL *url.URL, chunkStart int64, chunkEnd int6
 	return &partialDownload{resourceURL, rangeHeader, out, nil, chunkEnd - chunkStart, chunkStart}
 }
 
+//CreateClient Crea un cliente http con o sin proxy
+func CreateClient() *http.Client {
+	proxy := os.Getenv("http_proxy")
+	var proxyURL *url.URL
+	var transport *http.Transport
+	if proxy != "" {
+		proxyURL, _ = url.Parse(proxy)
+	}
+	if proxyURL != nil {
+		transport = &http.Transport{
+			Proxy: http.ProxyURL(proxyURL),
+		}
+	}
+	var client http.Client
+	if transport != nil {
+		client = http.Client{
+			Transport: transport,
+		}
+	}
+	return &client
+}
+
 // Descarga Parcial
 func (p *partialDownload) Download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	// Request
 	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
 	if error != nil {
 		p.err = error
 		return
 	}
+
 	// Seteo rango de descarga
 	req.Header.Add("Range", p.rangeHeader)
-	var client http.Client
+	var client = CreateClient()
+
 	resp, error := client.Do(req)
 	if error != nil {
 		p.err = error
@@ -116,7 +141,8 @@ func (r *progressReader) Read(p []byte) (n int, err error) {
 // File descarga un archivo en partes procesadas en procesos simultaneos
 func File(resourceURL *url.URL, workers int64, out *os.File, listener func(status []Status)) {
 
-	res, err := http.Head(resourceURL.String())
+	client := CreateClient()
+	res, err := client.Head(resourceURL.String())
 	if err != nil {
 		log.Fatalf("error requesting HEAD of file: %v", err)
 	}

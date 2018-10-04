@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -51,7 +50,8 @@ func main() {
 	}
 	defer out.Close()
 
-	res, err := http.Head(resourceURL.String())
+	client := download.CreateClient()
+	res, err := client.Head(resourceURL.String())
 	if err != nil {
 		log.Fatalf("error requesting HEAD of file: %v", err)
 	}
