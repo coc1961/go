@@ -58,6 +58,7 @@ func CreateClient() *http.Client {
 			Transport: transport,
 		}
 	}
+
 	return &client
 }
 
@@ -132,8 +133,7 @@ func (r *progressReader) Progress() int64 {
 
 // Actualizo % de descarga y realizo la lectura real
 func (r *progressReader) Read(p []byte) (n int, err error) {
-	rr := *(r.reader)
-	lei, err := rr.Read(p)
+	lei, err := (*(r.reader)).Read(p)
 	r.pos += int64(lei)
 	return lei, err
 }
