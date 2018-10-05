@@ -63,7 +63,7 @@ func CreateClient() *http.Client {
 }
 
 // Descarga Parcial
-func (p *partialDownload) Download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
+func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Request
@@ -188,7 +188,7 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 
 		go func() {
 			// Comienzo Descarga parcial
-			tmp.Download(&progressBarArray, &wg)
+			tmp.download(&progressBarArray, &wg)
 		}()
 	}
 
