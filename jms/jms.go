@@ -9,10 +9,9 @@ import (
 
 // Connection jms Object
 type Connection struct {
-	conn      *stomp.Conn
-	subs      *stomp.Subscription
-	ackSubs   *stomp.Subscription
-	connected bool
+	conn    *stomp.Conn
+	subs    *stomp.Subscription
+	ackSubs *stomp.Subscription
 }
 
 // Message jms message Object
@@ -31,7 +30,7 @@ func Connect(url, user, password string) (*Connection, error) {
 	if err != nil {
 		return nil, err
 	}
-	jms := Connection{conn, nil, nil, true}
+	jms := Connection{conn, nil, nil}
 	return &jms, nil
 }
 
@@ -49,7 +48,6 @@ func (j *Connection) Disconnect() {
 	if j.conn != nil {
 		j.conn.Disconnect()
 		j.conn = nil
-		j.connected = false
 	}
 }
 
@@ -60,7 +58,8 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) []by
 		return err
 	}
 	var msg *Message = nil
-	for j.connected {
+
+	for j.conn != nil {
 		msg, err = j.Read()
 		if err != nil {
 			return err
