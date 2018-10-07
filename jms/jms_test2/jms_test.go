@@ -12,6 +12,9 @@ const QUEUENAME = "testQueue"
 
 var CONT = 100
 
+var sent = 0
+var recv = 0
+
 func TestConnect(t *testing.T) {
 
 	jms.SetLogEnable(false)
@@ -25,6 +28,10 @@ func TestConnect(t *testing.T) {
 	go client(wg)
 
 	wg.Wait()
+	if sent != recv || sent != CONT {
+		t.Fatal("Send and Recv Differ")
+	}
+
 }
 
 func server(wg *sync.WaitGroup) {
@@ -47,6 +54,8 @@ func server(wg *sync.WaitGroup) {
 		msg, err := conn.ReadAck()
 		printError("server", err)
 		fmt.Println("Ack = ", string(msg))
+
+		sent++
 
 	}
 
@@ -76,6 +85,8 @@ func client(wg *sync.WaitGroup) {
 
 		// Envio Ack del mensaje
 		ack.SendAck(QUEUENAME, []byte(string(ack.Msg)+".Ok"))
+
+		recv++
 	}
 
 	// Desconecto

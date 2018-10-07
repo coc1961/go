@@ -57,8 +57,7 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) []by
 	if err != nil {
 		return err
 	}
-	var msg *Message = nil
-
+	var msg *Message
 	for j.conn != nil {
 		msg, err = j.Read()
 		if err != nil {
@@ -67,9 +66,7 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) []by
 		if resp := listener(msg); resp != nil {
 			msg.SendAck(queue, resp)
 		}
-
 	}
-
 	return nil
 }
 

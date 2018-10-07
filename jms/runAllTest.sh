@@ -1,0 +1,1 @@
+for a in $(ls -d jms_*);  do  cd $a ; go test | grep -v = ;cd .. ; done
