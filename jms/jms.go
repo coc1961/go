@@ -7,35 +7,36 @@ import (
 	"github.com/go-stomp/stomp"
 )
 
-// JMS jms Object
-type JMS struct {
-	conn    *stomp.Conn
-	subs    *stomp.Subscription
-	ackSubs *stomp.Subscription
+// Connection jms Object
+type Connection struct {
+	conn      *stomp.Conn
+	subs      *stomp.Subscription
+	ackSubs   *stomp.Subscription
+	connected bool
 }
 
 // Message jms message Object
 type Message struct {
 	Msg  []byte
 	smsg *stomp.Message
-	jms  *JMS
+	jms  *Connection
 }
 
 var logEnable = false
 
 // Connect Connect to Queue
-func Connect(url, user, password string) (*JMS, error) {
+func Connect(url, user, password string) (*Connection, error) {
 	localLog("Connect")
 	conn, err := stomp.Dial("tcp", url, stomp.ConnOpt.Login(user, password))
 	if err != nil {
 		return nil, err
 	}
-	jms := JMS{conn, nil, nil}
+	jms := Connection{conn, nil, nil, true}
 	return &jms, nil
 }
 
 // Disconnect Unsuscribe and Disconnect
-func (j *JMS) Disconnect() {
+func (j *Connection) Disconnect() {
 	localLog("Disconnect")
 	if j.subs != nil {
 		j.subs.Unsubscribe()
@@ -48,11 +49,33 @@ func (j *JMS) Disconnect() {
 	if j.conn != nil {
 		j.conn.Disconnect()
 		j.conn = nil
+		j.connected = false
 	}
 }
 
+// SuscribeListener Suscribe  listener to queue
+func (j *Connection) SuscribeListener(queue string, listener func(*Message) ([]byte, bool)) error {
+	err := j.Suscribe(queue)
+	if err != nil {
+		return err
+	}
+	var msg *Message = nil
+	for j.connected {
+		msg, err = j.Read()
+		if err != nil {
+			return err
+		}
+		if resp, ok := listener(msg); ok == true {
+			msg.SendAck(queue, resp)
+		}
+
+	}
+
+	return nil
+}
+
 // Suscribe Suscribe Queue
-func (j *JMS) Suscribe(queue string) error {
+func (j *Connection) Suscribe(queue string) error {
 	localLog("Suscribe")
 	if queue == "" {
 		return errors.New("Invalid Queue")
@@ -69,7 +92,7 @@ func (j *JMS) Suscribe(queue string) error {
 }
 
 // Read Read Message
-func (j *JMS) Read() (*Message, error) {
+func (j *Connection) Read() (*Message, error) {
 	localLog("Read")
 	if j.subs == nil {
 		return nil, errors.New("Invalid Subscription")
@@ -82,13 +105,13 @@ func (j *JMS) Read() (*Message, error) {
 }
 
 // Send Send message
-func (j *JMS) Send(queue string, msg []byte) error {
+func (j *Connection) Send(queue string, msg []byte) error {
 	localLog("Send")
 	return j.conn.Send(queue, "", msg, stomp.SendOpt.Receipt)
 }
 
 // SuscribeAck Suscribe Queue
-func (j *JMS) SuscribeAck(queue string) error {
+func (j *Connection) SuscribeAck(queue string) error {
 	localLog("SuscribeAck")
 	if queue == "" {
 		return errors.New("Invalid Queue")
@@ -102,7 +125,7 @@ func (j *JMS) SuscribeAck(queue string) error {
 }
 
 // ReadAck Read Ack
-func (j *JMS) ReadAck() ([]byte, error) {
+func (j *Connection) ReadAck() ([]byte, error) {
 	localLog("ReadAck")
 	if j.ackSubs == nil {
 		return nil, errors.New("Invalid Subscription")
