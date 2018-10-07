@@ -1,8 +1,9 @@
-package main
+package jms_test
 
 import (
 	"fmt"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/coc1961/go/jms"
@@ -14,7 +15,7 @@ const QUEUENAME = "testQueue"
 //CONT Number of Message to process
 var CONT = 100
 
-func main() {
+func TestConnect(t *testing.T) {
 
 	jms.SetLogEnable(false)
 
@@ -49,7 +50,7 @@ func server(wg *sync.WaitGroup) {
 		// Leo Ack
 		msg, err := conn.ReadAck()
 		printError("server", err)
-		fmt.Println("Ack = ", string(msg))
+		fmt.Println("Ack =", string(msg))
 
 	}
 
@@ -59,7 +60,6 @@ func server(wg *sync.WaitGroup) {
 }
 
 func client(wg *sync.WaitGroup) {
-	var err error
 
 	// Connecto
 	conn, err := jms.Connect("localhost:61613", "admin", "admin")
@@ -67,10 +67,10 @@ func client(wg *sync.WaitGroup) {
 
 	var cont = 0
 	// Suscribo a la cola con un listener
-	go conn.SuscribeListener(QUEUENAME, func(msg *jms.Message) ([]byte, bool) {
-		fmt.Println(string(msg.Msg))
+	go conn.SuscribeListener(QUEUENAME, func(msg *jms.Message) []byte {
+		fmt.Println("Msg =", string(msg.Msg))
 		cont++
-		return []byte(string(msg.Msg) + ".Ok"), true
+		return []byte(string(msg.Msg) + ".Ok")
 	})
 
 	// Espero que se procesen los mensajes

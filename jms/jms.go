@@ -54,7 +54,7 @@ func (j *Connection) Disconnect() {
 }
 
 // SuscribeListener Suscribe  listener to queue
-func (j *Connection) SuscribeListener(queue string, listener func(*Message) ([]byte, bool)) error {
+func (j *Connection) SuscribeListener(queue string, listener func(*Message) []byte) error {
 	err := j.Suscribe(queue)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) ([]b
 		if err != nil {
 			return err
 		}
-		if resp, ok := listener(msg); ok == true {
+		if resp := listener(msg); resp != nil {
 			msg.SendAck(queue, resp)
 		}
 
