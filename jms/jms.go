@@ -16,9 +16,26 @@ type Connection struct {
 
 // Message jms message Object
 type Message struct {
-	Msg  []byte
-	smsg *stomp.Message
-	jms  *Connection
+	msg         []byte
+	smsg        *stomp.Message
+	jms         *Connection
+	destination string
+	contentType string
+}
+
+// Message get message body
+func (m *Message) Message() []byte {
+	return m.msg
+}
+
+// Destination get Destination
+func (m *Message) Destination() string {
+	return m.destination
+}
+
+// ContentType get ContentType
+func (m *Message) ContentType() string {
+	return m.contentType
 }
 
 var logEnable = false
@@ -97,7 +114,7 @@ func (j *Connection) Read() (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Message{msg.Body, msg, j}, nil
+	return &Message{msg.Body, msg, j, msg.Destination, msg.ContentType}, nil
 }
 
 // Send Send message

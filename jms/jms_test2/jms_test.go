@@ -81,10 +81,10 @@ func client(wg *sync.WaitGroup) {
 		// Espero mensaje
 		ack, err = conn.Read()
 		printError("client", err)
-		fmt.Println("Message =" + string(ack.Msg))
+		fmt.Println("Message =" + string(ack.Message()))
 
 		// Envio Ack del mensaje
-		ack.SendAck(QUEUENAME, []byte(string(ack.Msg)+".Ok"))
+		ack.SendAck(QUEUENAME, []byte(string(ack.Message())+".Ok"))
 
 		recv++
 	}

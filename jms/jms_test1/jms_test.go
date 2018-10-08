@@ -77,10 +77,10 @@ func client(wg *sync.WaitGroup) {
 	var cont = 0
 	// Suscribo a la cola con un listener
 	go conn.SuscribeListener(QUEUENAME, func(msg *jms.Message) []byte {
-		fmt.Println("Msg =", string(msg.Msg))
+		fmt.Println("Msg =", string(msg.Message()))
 		cont++
 		recv++
-		return []byte(string(msg.Msg) + ".Ok")
+		return []byte(string(msg.Message()) + ".Ok")
 	})
 
 	// Espero que se procesen los mensajes
