@@ -74,7 +74,9 @@ type Client struct {
 
 //Disconnect Disconnect
 func (s *Client) Disconnect() {
-	s.conn.Disconnect()
+	tmp := s.conn
+	s.conn = nil
+	tmp.Disconnect()
 }
 
 //NewClient create a jms client object
@@ -86,9 +88,24 @@ func NewClient(url, user, password, queue string, listener func(msg *Message) []
 		return nil, err
 	}
 
-	go conn.SuscribeListener(queue, listener)
+	conn.Suscribe(queue)
 
 	client := &Client{conn}
+
+	go func() {
+		for client.conn != nil {
+			// Leo Ack
+			msg, err := conn.Read()
+			if err == nil {
+				resp := listener(msg)
+				if resp != nil {
+					msg.SendAck(queue, msg.Message())
+				} else {
+					msg.SendNack()
+				}
+			}
+		}
+	}()
 
 	return client, nil
 }

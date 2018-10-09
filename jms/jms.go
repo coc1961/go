@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-stomp/stomp"
+	"github.com/go-stomp/stomp/frame"
 )
 
 // Connection jms Object
@@ -82,6 +83,8 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) []by
 		}
 		if resp := listener(msg); resp != nil {
 			msg.SendAck(queue, resp)
+		} else {
+			msg.SendNack()
 		}
 	}
 	return nil
@@ -151,12 +154,19 @@ func (j *Connection) ReadAck() ([]byte, error) {
 }
 
 // SendAck Send ack to sender
-func (j *Message) SendAck(queue string, msg []byte) error {
+func (m *Message) SendAck(queue string, msg []byte) error {
 	localLog("SendAck")
-	err := j.jms.conn.Send(queue+"_ack", "", msg, stomp.SendOpt.Receipt)
+	err := m.jms.conn.Send(queue+"_ack", "", msg, func(*frame.Frame) error { return nil })
 	if err == nil {
-		j.jms.conn.Ack(j.smsg)
+		m.jms.conn.Ack(m.smsg)
 	}
+	return err
+}
+
+// SendNack Send ack to sender
+func (m *Message) SendNack() error {
+	localLog("SendNack")
+	err := m.jms.conn.Nack(m.smsg)
 	return err
 }
 
