@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "eVPagc7Ei81mIIid88e4J0e6IKc=",
+			"path": "github.com/go-stomp/stomp",
+			"revision": "8a8033db547238f32a69359fc1b0c50359339e95",
+			"revisionTime": "2018-09-19T16:42:25Z"
+		},
+		{
+			"checksumSHA1": "LsLv9esDVK47nkoMEbDJ/jPH4C0=",
+			"path": "github.com/go-stomp/stomp/frame",
+			"revision": "8a8033db547238f32a69359fc1b0c50359339e95",
+			"revisionTime": "2018-09-19T16:42:25Z"
+		}
+	],
+	"rootPath": "github.com/coc1961/go/jms"
+}
