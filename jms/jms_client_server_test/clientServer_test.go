@@ -40,7 +40,7 @@ func server(wg *sync.WaitGroup) {
 		msg := fmt.Sprintf("Message %d", i)
 		server.Send([]byte(msg))
 	}
-	for sent < CONT {
+	for recv < CONT {
 		time.Sleep(time.Microsecond)
 	}
 	time.Sleep(time.Second)

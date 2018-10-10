@@ -105,8 +105,6 @@ func (j *Connection) SuscribeListener(queue string, listener func(*Message) []by
 		}
 		if resp := listener(msg); resp != nil {
 			msg.SendAck(queue, resp)
-		} else {
-			msg.SendNack()
 		}
 	}
 	return nil

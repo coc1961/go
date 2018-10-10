@@ -100,8 +100,6 @@ func NewClient(url, user, password, queue string, listener func(msg *Message) []
 				resp := listener(msg)
 				if resp != nil {
 					msg.SendAck(queue, resp)
-				} else {
-					msg.SendNack()
 				}
 			}
 		}
