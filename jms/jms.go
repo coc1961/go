@@ -92,23 +92,23 @@ func (j *Connection) Disconnect() {
 }
 
 // SuscribeListener Suscribe  listener to queue
-func (j *Connection) SuscribeListener(queue string, listener func(*Message) []byte) error {
-	err := j.Suscribe(queue)
-	if err != nil {
-		return err
-	}
-	var msg *Message
-	for j.conn != nil {
-		msg, err = j.Read()
-		if err != nil {
-			return err
-		}
-		if resp := listener(msg); resp != nil {
-			msg.SendAck(queue, resp)
-		}
-	}
-	return nil
-}
+// func (j *Connection) SuscribeListener(queue string, listener func(*Message) []byte) error {
+// 	err := j.Suscribe(queue)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	var msg *Message
+// 	for j.conn != nil {
+// 		msg, err = j.Read()
+// 		if err != nil {
+// 			return err
+// 		}
+// 		if resp := listener(msg); resp != nil {
+// 			msg.SendAck(queue, resp)
+// 		}
+// 	}
+// 	return nil
+// }
 
 // Suscribe Suscribe Queue
 func (j *Connection) Suscribe(queue string) error {
