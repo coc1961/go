@@ -9,7 +9,7 @@ import (
 	"github.com/coc1961/go/jms"
 )
 
-const CONT = 10000
+const CONT = 100
 
 var sent = 0
 var recv = 0
@@ -32,8 +32,8 @@ func TestServer(t *testing.T) {
 }
 
 func server(wg *sync.WaitGroup) {
-	server, _ := jms.NewServer("localhost:61613", "admin", "admin", "test", func(msg []byte) {
-		fmt.Println("Ack =", string(msg))
+	server, _ := jms.NewServer("localhost:61613", "admin", "admin", "test", func(msg *jms.MessageAck) {
+		fmt.Println("Ack =", string(msg.Message()))
 		sent++
 	})
 	for i := 0; i < CONT; i++ {
@@ -52,7 +52,7 @@ func client(wg *sync.WaitGroup) {
 	client, _ := jms.NewClient("localhost:61613", "admin", "admin", "test", func(msg *jms.Message) []byte {
 		fmt.Println("Msg =", string(msg.Message()))
 		recv++
-		return msg.Message()
+		return []byte(string(msg.Message()) + ".ack")
 	})
 	for recv < CONT {
 		time.Sleep(time.Microsecond)

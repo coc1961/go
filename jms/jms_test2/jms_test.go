@@ -53,7 +53,7 @@ func server(wg *sync.WaitGroup) {
 		// Leo Ack
 		msg, err := conn.ReadAck()
 		printError("server", err)
-		fmt.Println("Ack = ", string(msg))
+		fmt.Println("Ack = ", string(msg.Message()))
 
 		sent++
 

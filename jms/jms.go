@@ -39,6 +39,28 @@ func (m *Message) ContentType() string {
 	return m.contentType
 }
 
+// MessageAck jms message Object
+type MessageAck struct {
+	msg         []byte
+	destination string
+	contentType string
+}
+
+// Message get message body
+func (m *MessageAck) Message() []byte {
+	return m.msg
+}
+
+// Destination get Destination
+func (m *MessageAck) Destination() string {
+	return m.destination
+}
+
+// ContentType get ContentType
+func (m *MessageAck) ContentType() string {
+	return m.contentType
+}
+
 var logEnable = false
 
 // Connect Connect to Queue
@@ -141,7 +163,7 @@ func (j *Connection) SuscribeAck(queue string) error {
 }
 
 // ReadAck Read Ack
-func (j *Connection) ReadAck() ([]byte, error) {
+func (j *Connection) ReadAck() (*MessageAck, error) {
 	localLog("ReadAck")
 	if j.ackSubs == nil {
 		return nil, errors.New("Invalid Subscription")
@@ -150,7 +172,7 @@ func (j *Connection) ReadAck() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return msg.Body, nil
+	return &MessageAck{msg.Body, msg.Destination, msg.ContentType}, nil
 }
 
 // SendAck Send ack to sender

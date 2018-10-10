@@ -33,7 +33,7 @@ func (s *Server) Disconnect() {
 }
 
 //NewServer create a jms server object
-func NewServer(url, user, password, queue string, listener func([]byte)) (*Server, error) {
+func NewServer(url, user, password, queue string, listener func(*MessageAck)) (*Server, error) {
 	var err error
 	// Connecto
 	conn, err := Connect(url, user, password)
@@ -99,7 +99,7 @@ func NewClient(url, user, password, queue string, listener func(msg *Message) []
 			if err == nil {
 				resp := listener(msg)
 				if resp != nil {
-					msg.SendAck(queue, msg.Message())
+					msg.SendAck(queue, resp)
 				} else {
 					msg.SendNack()
 				}
