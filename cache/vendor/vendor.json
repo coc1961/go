@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "56J7Zbj/haU4YAzYq+PvTfFxk8Y=",
+			"path": "github.com/bradfitz/gomemcache/memcache",
+			"revision": "bc664df9673713a0ccf26e3b55a673ec7301088b",
+			"revisionTime": "2018-07-10T15:56:16Z"
+		}
+	],
+	"rootPath": "github.com/coc1961/go/cache"
+}
