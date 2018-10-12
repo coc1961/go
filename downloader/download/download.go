@@ -71,6 +71,8 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 	var wrapReader *progressReader
 
 	for i := 0; i < 5; i++ {
+		// Seteo el rango a descargar
+		p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
 
 		// Request
 		req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
@@ -107,6 +109,10 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 			wrapReader = createprogressReader(&resp.Body, p.chunkSize)
 			*progressArray = append(*progressArray, wrapReader)
 		} else {
+			// Reproceso
+			// Actualizo el progressReader
+			wrapReader.len = p.chunkSize
+			wrapReader.pos = 0
 			wrapReader.reader = &resp.Body
 		}
 
@@ -118,10 +124,6 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 			// Recalculo la posicion
 			p.chunkStart += wrapReader.pos
 			p.chunkSize = p.chunkEnd - p.chunkStart
-			p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
-			// Actualizo el progressReader
-			wrapReader.len = p.chunkSize
-			wrapReader.pos = 0
 			out.Close()
 		} else {
 			break
