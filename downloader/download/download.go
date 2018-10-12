@@ -116,7 +116,7 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 			// Si Hay Error Reproceso
 			p.err = error
 			// Recalculo la posicion
-			p.chunkStart += wrapReader.pos - 1024
+			p.chunkStart += wrapReader.pos
 			p.chunkSize = p.chunkEnd - p.chunkStart
 			p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
 			// Actualizo el progressReader
