@@ -113,10 +113,13 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 		// Descargo!
 		_, error = io.Copy(p.out, wrapReader)
 		if error != nil {
+			// Si Hay Error Reproceso
 			p.err = error
+			// Recalculo la posicion
 			p.chunkStart += wrapReader.pos - 1024
 			p.chunkSize = p.chunkEnd - p.chunkStart
 			p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
+			// Actualizo el progressReader
 			wrapReader.len = p.chunkSize
 			wrapReader.pos = 0
 			out.Close()
