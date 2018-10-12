@@ -31,12 +31,13 @@ type partialDownload struct {
 	err         error    // error ?
 	chunkSize   int64    // bytes a descargar
 	chunkStart  int64    // posicion de inicio
+	chunkEnd    int64    // posicion de fin
 }
 
 // Creo partialDownload
 func createPartialDownload(resourceURL *url.URL, chunkStart int64, chunkEnd int64, out *os.File) *partialDownload {
 	rangeHeader := fmt.Sprintf("bytes=%d-%d", chunkStart, chunkEnd)
-	return &partialDownload{resourceURL, rangeHeader, out, nil, chunkEnd - chunkStart, chunkStart}
+	return &partialDownload{resourceURL, rangeHeader, out, nil, chunkEnd - chunkStart, chunkStart, chunkEnd}
 }
 
 //CreateClient Crea un cliente http con o sin proxy
@@ -59,6 +60,7 @@ func CreateClient() *http.Client {
 		}
 	}
 
+	//client.Timeout = time.Second * 5
 	return &client
 }
 
@@ -66,45 +68,62 @@ func CreateClient() *http.Client {
 func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	// Request
-	req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
-	if error != nil {
-		p.err = error
-		return
-	}
+	var wrapReader *progressReader
 
-	// Seteo rango de descarga
-	req.Header.Add("Range", p.rangeHeader)
-	var client = CreateClient()
+	for i := 0; i < 5; i++ {
 
-	resp, error := client.Do(req)
-	if error != nil {
-		p.err = error
-		return
-	}
+		// Request
+		req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
+		if error != nil {
+			p.err = error
+			return
+		}
 
-	// Archivo de descarga parcial
-	out, err := os.OpenFile(p.out.Name(), os.O_RDWR, os.ModePerm)
-	if err != nil {
-		p.err = err
-		return
-	}
-	p.out = out
+		// Seteo rango de descarga
+		req.Header.Add("Range", p.rangeHeader)
+		var client = CreateClient()
 
-	// Me posiciono en la posicion en donde debo descargar
-	p.out.Seek(p.chunkStart, os.SEEK_SET)
+		resp, error := client.Do(req)
+		if error != nil {
+			p.err = error
+			return
+		}
 
-	// Creo un emboltorio de reader para que setee valores
-	// de progreso de descarga para alimentar la barra de %
-	wrapReader := createprogressReader(&resp.Body, p.chunkSize)
+		// Archivo de descarga parcial
+		out, err := os.OpenFile(p.out.Name(), os.O_RDWR, os.ModePerm)
+		if err != nil {
+			p.err = err
+			return
+		}
+		p.out = out
 
-	// Agrego al array para desplegar el porc de descarga
-	*progressArray = append(*progressArray, wrapReader)
+		// Me posiciono en la posicion en donde debo descargar
+		p.out.Seek(p.chunkStart, os.SEEK_SET)
 
-	// Descargo!
-	_, error = io.Copy(p.out, wrapReader)
-	if error != nil {
-		p.err = error
+		// Agrego al array para desplegar el porc de descarga
+		if i == 0 {
+			// Creo un emboltorio de reader para que setee valores
+			// de progreso de descarga para alimentar la barra de %
+			wrapReader = createprogressReader(&resp.Body, p.chunkSize)
+			*progressArray = append(*progressArray, wrapReader)
+		} else {
+			wrapReader.reader = &resp.Body
+		}
+
+		// Descargo!
+		_, error = io.Copy(p.out, wrapReader)
+		if error != nil {
+			p.err = error
+			p.chunkStart += wrapReader.pos - 1024
+			p.chunkSize = p.chunkEnd - p.chunkStart
+			p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
+			wrapReader.len = p.chunkSize
+			wrapReader.pos = 0
+			out.Close()
+		} else {
+			p.err = nil
+			break
+		}
 	}
 	return
 }
