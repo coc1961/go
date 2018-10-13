@@ -22,6 +22,8 @@ import (
 )
 
 const sleepTipme time.Duration = 500
+const secondsTimeout = 10
+const nanosecondsTimeout = secondsTimeout * 1000000000
 
 // Estructura de descarga parcial
 type partialDownload struct {
@@ -70,7 +72,7 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 
 	var wrapReader *progressReader
 
-	for i := 0; i < 5; i++ {
+	for i := 0; ; i++ {
 		// Seteo el rango a descargar
 		p.rangeHeader = fmt.Sprintf("bytes=%d-%d", p.chunkStart, p.chunkEnd)
 
@@ -78,7 +80,7 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 		req, error := http.NewRequest("GET", p.resourceURL.String(), nil)
 		if error != nil {
 			p.err = error
-			return
+			continue
 		}
 
 		// Seteo rango de descarga
@@ -88,7 +90,7 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 		resp, error := client.Do(req)
 		if error != nil {
 			p.err = error
-			return
+			continue
 		}
 
 		// Archivo de descarga parcial
@@ -134,7 +136,8 @@ func (p *partialDownload) download(progressArray *[]*progressReader, wg *sync.Wa
 
 // Creo el objeto para alimentar la barra de progreso
 func createprogressReader(reader *io.ReadCloser, len int64) *progressReader {
-	return &progressReader{reader, len, 0}
+	ret := &progressReader{reader, len, 0, time.Now()}
+	return ret
 }
 
 // Status chunck download status
@@ -144,9 +147,10 @@ type Status interface {
 
 //progressReader  Envoltorio de reader que guarda el % de descarga
 type progressReader struct {
-	reader *io.ReadCloser // Reader original
-	len    int64          // total a descargar
-	pos    int64          // bytes procesados
+	reader   *io.ReadCloser // Reader original
+	len      int64          // total a descargar
+	pos      int64          // bytes procesados
+	lastRead time.Time      // Ultima Lectura
 }
 
 //Progress Retorna al porcentaje de la descarga realizada
@@ -156,6 +160,7 @@ func (r *progressReader) Progress() int64 {
 
 // Actualizo % de descarga y realizo la lectura real
 func (r *progressReader) Read(p []byte) (n int, err error) {
+	r.lastRead = time.Now()
 	lei, err := (*(r.reader)).Read(p)
 	r.pos += int64(lei)
 	return lei, err
@@ -196,6 +201,9 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 
 	wg := sync.WaitGroup{}
 	wg.Add(int(workers))
+
+	// Lanzo el Hilo de Verificacion de Timeout
+	go timeoutVerify(&progressBarArray)
 
 	// Creo los downloaders parciales
 	for i := int64(0); i < workers; i++ {
@@ -250,4 +258,18 @@ func File(resourceURL *url.URL, workers int64, out *os.File, listener func(statu
 	}
 	time.Sleep(time.Millisecond * sleepTipme)
 
+}
+
+// Verifico el Timeout para detectar caidas en la conexion
+func timeoutVerify(progressBarArray *[]*progressReader) {
+	for {
+		for _, ret := range *progressBarArray {
+			diff := time.Now().Sub(ret.lastRead)
+			if diff > nanosecondsTimeout {
+				(*(ret.reader)).Close()
+				ret.lastRead = time.Now()
+			}
+		}
+		time.Sleep(time.Second)
+	}
 }
