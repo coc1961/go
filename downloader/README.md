@@ -9,4 +9,4 @@ Programa para descarga de archivos, permite partir la descarga en varios hilos s
     -n   number of concurent downloads (Optional) 
     -v   show progress (Optional)
 
-Se implementa recuperacion de errores
+Se implementa recuperacion de errores en caso de microcortes en la comunicacion
