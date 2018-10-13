@@ -4,12 +4,9 @@ Programa para descarga de archivos, permite partir la descarga en varios hilos s
 
 ### parametros:
 
-    -n int
-        number of concurent downloads (Optional) (default 2)
-    -o string
-        output file (required)
-    -url string
-        download file url (required)
-    -v    show progress (Optional)
+    -url file url (required)
+    -o   output file (required)
+    -n   number of concurent downloads (Optional) 
+    -v   show progress (Optional)
 
 Se implementa recuperacion de errores
