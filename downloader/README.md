@@ -11,7 +11,7 @@ Programa para descarga de archivos, permite partir la descarga en varios hilos s
 
 ### Ejemplo de Uso
 
-`downloader -n 5 -v -url http://myhost.com/eclipse.zip -o eclipse.zip`
+`****downloader -n 5 -v -url http://myhost.com/eclipse.zip -o eclipse.zip`
 
 ### Notas
 
