@@ -15,7 +15,8 @@ import (
 	"github.com/coc1961/go/downloader/download"
 )
 
-// BUG(carlos): Manage Errors!
+// Descarga en paralelo de archivo
+// Soporta hasta n hilos, pasados por parametro
 func main() {
 	var pointerVerbose = flag.Bool("v", false, "show progress (Optional)")
 	var pointerWorkers = flag.Int64("n", 2, "number of concurent downloads (Optional)")
