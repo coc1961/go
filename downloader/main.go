@@ -15,7 +15,7 @@ import (
 	"github.com/coc1961/go/downloader/download"
 )
 
-// Descarga en paralelo de archivo
+// Gestor de Descarga Descarga en paralelo de archivo
 // Soporta hasta n hilos, pasados por parametro
 
 func main() {
@@ -27,7 +27,8 @@ func main() {
 	flag.Parse()
 
 	if *pointerWorkers < 1 || *pointerSUrl == "" || *pointerOutputFile == "" {
-		flag.Usage()
+		fmt.Fprintf(flag.CommandLine.Output(), "\n\nDownload Manager (%s) \n\n", os.Args[0])
+		flag.PrintDefaults()
 		os.Exit(1)
 		return
 	}

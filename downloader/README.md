@@ -1,5 +1,7 @@
 # Dowloader
 
+#### Gestor de Descarga 
+
 Programa para descarga de archivos, permite partir la descarga en varios hilos simultáneos.
 
 ### parámetros:
