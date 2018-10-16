@@ -27,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	if *pointerWorkers < 1 || *pointerSUrl == "" || *pointerOutputFile == "" {
-		fmt.Fprintf(flag.CommandLine.Output(), "\n\nDownload Manager (%s) \n\n", os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), "Download Manager (%s) \n\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
 		return
