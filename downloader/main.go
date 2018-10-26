@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -20,17 +21,21 @@ import (
 
 func main() {
 	var pointerVerbose = flag.Bool("v", false, "show progress (Optional)")
-	var pointerWorkers = flag.Int64("n", 2, "number of concurent downloads (Optional)")
+	var pointerWorkers = flag.Int64("n", 1, "number of concurent downloads (Optional)")
+	var pointerOutputFile = flag.String("o", "", "output file (Optional)")
 	var pointerSUrl = flag.String("url", "", "download file url (required)")
-	var pointerOutputFile = flag.String("o", "", "output file (required)")
 
 	flag.Parse()
 
-	if *pointerWorkers < 1 || *pointerSUrl == "" || *pointerOutputFile == "" {
+	if *pointerWorkers < 1 || *pointerSUrl == "" {
 		fmt.Fprintf(flag.CommandLine.Output(), "Download Manager (%s) \n\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(1)
 		return
+	}
+	if *pointerOutputFile == "" {
+		filename := filepath.Base(*pointerSUrl)
+		pointerOutputFile = &filename
 	}
 
 	verbose := *pointerVerbose
@@ -83,7 +88,7 @@ func main() {
 	elapsed := time.Since(start)
 	p := message.NewPrinter(language.English)
 	if verbose {
-		p.Printf("\nProcess %d Bytes in %d seconds\n", contentLength, int(elapsed.Seconds()))
+		p.Printf("\nProcess %d Bytes in %d seconds at %.2f Mbps\n", contentLength, int(elapsed.Seconds()), ((float64(contentLength) / float64(1024*1024)) / float64(elapsed.Seconds())))
 	}
 }
 
