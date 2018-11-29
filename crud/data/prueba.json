@@ -1,0 +1,11 @@
+{
+    "name": "prueba",
+    "description": "Entidad de Prueba",
+    "schema" : {
+        "id":               { "type": "string", "id": true , "optional": false },
+        "name":             { "type": "string", "optional": false },
+        "amount":           { "type": "double", "optional": true, "default": 0.0 },
+        "age":              { "type": "integer", "optional": true, "default": 0 },
+        "creationDate":     { "type": "date", "optional": true, "default": "2000-01-01T00:00:00" }
+    }
+}
