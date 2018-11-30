@@ -10,7 +10,7 @@ import (
 type Entity struct {
 	Name        string
 	Description string
-	Fields      []Field
+	Fields      map[string]*Field
 }
 
 // Field Representa un atributo de una Entity
@@ -32,7 +32,7 @@ func (p Error) Error() string {
 	if err, ok := p.reason.(error); ok {
 		return fmt.Sprintf("%s => %v", p.message, err.Error())
 	}
-	return fmt.Sprintf("panic: %s => %v", p.message, p.reason)
+	return fmt.Sprintf("%s => %v", p.message, p.reason)
 }
 
 // Creo un objeto Field en base al json
@@ -45,9 +45,9 @@ func newField(name string, fld map[string]interface{}) *Field {
 	f.ID = false
 	f.Optional = false
 	f.Default = nil
+	f.Type = fld["type"].(string)
 
 	// Seteo valores leidos
-	f.Type = fld["type"].(string)
 	tmp = fld["id"]
 	if tmp != nil {
 		f.ID = tmp.(bool)
@@ -92,6 +92,7 @@ func (e *Entity) Load(home, name string) (err error) {
 	message = "Setting name and description"
 	e.Name = name
 	e.Description = ojson["description"].(string)
+	e.Fields = make(map[string]*Field)
 
 	fields := ojson["schema"].(map[string]interface{})
 
@@ -99,8 +100,77 @@ func (e *Entity) Load(home, name string) (err error) {
 		message = "Field '" + key + "'"
 
 		fld := value.(map[string]interface{})
-		e.Fields = append(e.Fields, *newField(key, fld))
+		f := newField(key, fld)
+		e.Fields[key] = f
 	}
 
 	return nil
+}
+
+// Validate Valida un json en base al esquema
+func (e *Entity) Validate(json map[string]interface{}) error {
+	for key, value := range json {
+		fld := e.Fields[key]
+		if fld == nil {
+			return Error{"Entity '" + e.Name + "' ", "Field '" + key + "' not valid"}
+		}
+		valid := validateValue(fld, value)
+		if !valid {
+			return Error{"Entity '" + e.Name + "' ", "Field '" + key + "' Invalid Value"}
+		}
+
+		fmt.Println(value)
+
+	}
+	return nil
+}
+
+func validateValue(fld *Field, value interface{}) bool {
+	if value == nil {
+		if fld.Optional == true {
+			return true
+		}
+		return false
+	}
+	switch fld.Type {
+	case "string":
+		_, ok := getString(value)
+		return ok
+	case "float":
+		_, ok := getFloat(value)
+		return ok
+	case "integer":
+		_, ok := getInt(value)
+		return ok
+	case "date":
+		_, ok := getDate(value)
+		return ok
+	case "bool":
+		_, ok := getBool(value)
+		return ok
+	}
+	return false
+}
+
+// Convierto interface a tipo de valor
+func getInt(value interface{}) (ret int64, ok bool) {
+	ret, ok = value.(int64)
+	return
+}
+func getFloat(value interface{}) (ret float64, ok bool) {
+	ret, ok = value.(float64)
+	return
+}
+func getString(value interface{}) (ret string, ok bool) {
+	ret, ok = value.(string)
+	return
+}
+func getBool(value interface{}) (ret bool, ok bool) {
+	ret, ok = value.(bool)
+	return
+}
+func getDate(value interface{}) (ret string, ok bool) {
+	ret, ok = value.(string)
+	//TODO COC Verifcar Formato
+	return
 }
