@@ -4,22 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 )
 
-// Entity Representa una Entidad a administrar con el crud
-type Entity struct {
-	Name        string
-	Description string
-	Fields      map[string]*Field
+// Definition Representa una Entidad a administrar con el crud
+type Definition struct {
+	Name              string
+	Description       string
+	FieldsRefinitions map[string]*FieldDefinition
 }
 
-// Field Representa un atributo de una Entity
-type Field struct {
+// FieldDefinition Representa un atributo de una Entity
+type FieldDefinition struct {
 	Name     string
 	Type     string
 	ID       bool
 	Optional bool
 	Default  interface{}
+	Child    map[string]*FieldDefinition
 }
 
 // Error Error en entidad
@@ -36,9 +38,9 @@ func (p Error) Error() string {
 }
 
 // Creo un objeto Field en base al json
-func newField(name string, fld map[string]interface{}) *Field {
+func newField(name string, fld map[string]interface{}) *FieldDefinition {
 	var tmp interface{}
-	var f Field
+	var f FieldDefinition
 
 	// Valores Default
 	f.Name = name
@@ -46,6 +48,7 @@ func newField(name string, fld map[string]interface{}) *Field {
 	f.Optional = false
 	f.Default = nil
 	f.Type = fld["type"].(string)
+	f.Child = nil
 
 	// Seteo valores leidos
 	tmp = fld["id"]
@@ -60,11 +63,22 @@ func newField(name string, fld map[string]interface{}) *Field {
 	if tmp != nil {
 		f.Default = tmp
 	}
+
+	if f.Type == "object" {
+		arrList := fld["attributes"].(map[string]interface{})
+		f.Child = make(map[string]*FieldDefinition)
+
+		for k, v := range arrList {
+			f.Child[k] = newField(k, v.(map[string]interface{}))
+			fmt.Println(k)
+		}
+
+	}
 	return &f
 }
 
 //Load carga una entidad desde un archivos de configuracion (json)
-func (e *Entity) Load(home, name string) (err error) {
+func (e *Definition) Load(home, name string) (err error) {
 	var message string
 
 	defer func() {
@@ -92,7 +106,7 @@ func (e *Entity) Load(home, name string) (err error) {
 	message = "Setting name and description"
 	e.Name = name
 	e.Description = ojson["description"].(string)
-	e.Fields = make(map[string]*Field)
+	e.FieldsRefinitions = make(map[string]*FieldDefinition)
 
 	fields := ojson["schema"].(map[string]interface{})
 
@@ -101,31 +115,49 @@ func (e *Entity) Load(home, name string) (err error) {
 
 		fld := value.(map[string]interface{})
 		f := newField(key, fld)
-		e.Fields[key] = f
+		e.FieldsRefinitions[key] = f
 	}
 
 	return nil
 }
 
-// Validate Valida un json en base al esquema
-func (e *Entity) Validate(json map[string]interface{}) error {
+// Parse Valida un json en base al esquema y retorna un objeto Entity
+func (e *Definition) Parse(json map[string]interface{}) (*Entity, error) {
+	ent := Entity{e.Name, make(map[string]*Attribute)}
+	var err error
+	ent.Atributes, err = e.fields(json)
+	if err != nil {
+		return nil, err
+	}
+	return &ent, err
+}
+
+func (e *Definition) fields(json map[string]interface{}) (map[string]*Attribute, error) {
+	attributes := make(map[string]*Attribute)
 	for key, value := range json {
-		fld := e.Fields[key]
+		fld := e.FieldsRefinitions[key]
 		if fld == nil {
-			return Error{"Entity '" + e.Name + "' ", "Field '" + key + "' not valid"}
+			return nil, Error{"Entity '" + e.Name + "' ", "Field '" + key + "' not valid"}
 		}
 		valid := validateValue(fld, value)
 		if !valid {
-			return Error{"Entity '" + e.Name + "' ", "Field '" + key + "' Invalid Value"}
+			return nil, Error{"Entity '" + e.Name + "' ", "Field '" + key + "' Invalid Value"}
 		}
-
-		fmt.Println(value)
-
+		attr := Attribute{fld, value, nil}
+		attributes[key] = &attr
+		if fld.Type == "object" {
+			var err error
+			attr.Child, err = e.fields(value.(map[string]interface{}))
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return nil
+	return attributes, nil
 }
 
-func validateValue(fld *Field, value interface{}) bool {
+// Valida un valor en base a la configuración
+func validateValue(fld *FieldDefinition, value interface{}) bool {
 	if value == nil {
 		if fld.Optional == true {
 			return true
@@ -154,7 +186,12 @@ func validateValue(fld *Field, value interface{}) bool {
 
 // Convierto interface a tipo de valor
 func getInt(value interface{}) (ret int64, ok bool) {
-	ret, ok = value.(int64)
+	ok = false
+	flo, ok1 := getFloat(value)
+	ok = ok1
+	if ok1 {
+		ret = int64(flo)
+	}
 	return
 }
 func getFloat(value interface{}) (ret float64, ok bool) {
@@ -169,8 +206,15 @@ func getBool(value interface{}) (ret bool, ok bool) {
 	ret, ok = value.(bool)
 	return
 }
-func getDate(value interface{}) (ret string, ok bool) {
-	ret, ok = value.(string)
-	//TODO COC Verifcar Formato
+func getDate(value interface{}) (ret time.Time, ok bool) {
+	var err error
+	var rets string
+	rets, ok = getString(value)
+	if ok {
+		ret, err = time.Parse(time.RFC3339, rets)
+		if err != nil {
+			ok = false
+		}
+	}
 	return
 }
