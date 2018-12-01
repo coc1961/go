@@ -18,8 +18,6 @@ func Test() {
 		fmt.Println(err.Error())
 	}
 
-	//fmt.Println(e)
-
 	sjson := `
 		{
 			"id": "xy23",
@@ -39,13 +37,23 @@ func Test() {
 	var ent *entity.Entity
 	ent, err = e.Parse(ojson)
 
-	fmt.Println(ent.Name)
+	fmt.Println("******* " + ent.Name + " *******")
 
 	for _, e := range ent.Atributes {
-		fmt.Println("=======================================")
-		fmt.Println(e.FieldDefinition.Name)
-		fmt.Println(e.FieldDefinition.Type)
-		fmt.Println(e.Value)
+		print(e, "")
 	}
 	fmt.Println("=======================================")
+}
+
+func print(e *entity.Attribute, space string) {
+	fmt.Println(space + "=======================================")
+	fmt.Println(space + e.FieldDefinition.Name)
+	fmt.Println(space + e.FieldDefinition.Type)
+	fmt.Print(space)
+	fmt.Println(e.Value)
+	if e.Child != nil {
+		for _, e1 := range e.Child {
+			print(e1, space+"\t")
+		}
+	}
 }

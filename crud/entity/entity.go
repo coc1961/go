@@ -65,12 +65,11 @@ func newField(name string, fld map[string]interface{}) *FieldDefinition {
 	}
 
 	if f.Type == "object" {
-		arrList := fld["attributes"].(map[string]interface{})
+		arrList := fld["properties"].(map[string]interface{})
 		f.Child = make(map[string]*FieldDefinition)
 
 		for k, v := range arrList {
 			f.Child[k] = newField(k, v.(map[string]interface{}))
-			fmt.Println(k)
 		}
 
 	}
@@ -125,17 +124,20 @@ func (e *Definition) Load(home, name string) (err error) {
 func (e *Definition) Parse(json map[string]interface{}) (*Entity, error) {
 	ent := Entity{e.Name, make(map[string]*Attribute)}
 	var err error
-	ent.Atributes, err = e.fields(json)
+	ent.Atributes, err = e.fields(nil, json)
 	if err != nil {
 		return nil, err
 	}
 	return &ent, err
 }
 
-func (e *Definition) fields(json map[string]interface{}) (map[string]*Attribute, error) {
+func (e *Definition) fields(parent map[string]*FieldDefinition, json map[string]interface{}) (map[string]*Attribute, error) {
+	if parent == nil {
+		parent = e.FieldsRefinitions
+	}
 	attributes := make(map[string]*Attribute)
 	for key, value := range json {
-		fld := e.FieldsRefinitions[key]
+		fld := parent[key]
 		if fld == nil {
 			return nil, Error{"Entity '" + e.Name + "' ", "Field '" + key + "' not valid"}
 		}
@@ -147,7 +149,8 @@ func (e *Definition) fields(json map[string]interface{}) (map[string]*Attribute,
 		attributes[key] = &attr
 		if fld.Type == "object" {
 			var err error
-			attr.Child, err = e.fields(value.(map[string]interface{}))
+			attr.Value = nil
+			attr.Child, err = e.fields(fld.Child, value.(map[string]interface{}))
 			if err != nil {
 				return nil, err
 			}
@@ -180,6 +183,9 @@ func validateValue(fld *FieldDefinition, value interface{}) bool {
 	case "bool":
 		_, ok := getBool(value)
 		return ok
+	case "object":
+		_, ok := getMap(value)
+		return ok
 	}
 	return false
 }
@@ -206,6 +212,7 @@ func getBool(value interface{}) (ret bool, ok bool) {
 	ret, ok = value.(bool)
 	return
 }
+
 func getDate(value interface{}) (ret time.Time, ok bool) {
 	var err error
 	var rets string
@@ -216,5 +223,10 @@ func getDate(value interface{}) (ret time.Time, ok bool) {
 			ok = false
 		}
 	}
+	return
+}
+
+func getMap(value interface{}) (ret map[string]interface{}, ok bool) {
+	ret, ok = value.(map[string]interface{})
 	return
 }

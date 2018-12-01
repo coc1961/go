@@ -29,7 +29,7 @@
         "hijo": {
             "type": "object",
             "optional": true,
-            "attributes": {
+            "properties": {
                 "idAtt": {
                     "type": "string",
                     "optional": false
@@ -39,6 +39,14 @@
                     "optional": false
                 }
             }
+        },
+        "soyArray": {
+            "type": "array",
+            "optional": true,
+            "items": {
+                "type": "string"
+            }
         }
+
     }
 }
