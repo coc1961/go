@@ -1,28 +1,15 @@
 package crudframework
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/coc1961/go/crud/entity"
-
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsschema/validator"
+	"github.com/coc1961/go/crud/entities"
 )
 
 // Test Prueba
 func Test() {
-	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	var e entity.Definition
-	err := e.Load(dir, "prueba")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
 	sjson := `
 		{
 			"id": "xy23",
@@ -40,80 +27,38 @@ func Test() {
 			]
 		}
 			`
-	var ojson map[string]interface{}
-	err = json.Unmarshal([]byte(sjson), &ojson)
+	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
-	s, err := schema.ReadFile(dir + "/data/pruebaschema.json")
+	var e entities.Definition
+
+	dir = "/home/carlos/gopath/src/github.com/coc1961/go/crud"
+	err := e.Load(dir, "/data/prueba")
 	if err != nil {
-		log.Printf("failed to read schema: %s", err)
+		fmt.Println(err.Error())
 		return
 	}
 
-	for name, pdef := range s.Properties {
-		// Do what you will with `pdef`, which contain
-		// Schema information for `name` property
-		fmt.Println(name)
-		fmt.Println(pdef)
+	_, err = e.Validate(sjson)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	// You can also validate an arbitrary piece of data
+	var ent *entities.Entity
+	ent, err = e.New(sjson)
 
-	v := validator.New(s)
-	if err := v.Validate(ojson); err != nil {
-		log.Printf("failed to validate data: %s", err)
-	}
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-	fmt.Println(parse(ojson, "/hijo/idAtt"))
-	fmt.Println(parse(ojson, "/soyArray"))
+	ent.Get("hijo").Get("idAtt").Set("Prueba")
 
-	/*
-		var ent *entity.Entity
-		ent, err = e.Parse(ojson)
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("******* " + ent.Name + " *******")
+	ent.Get("hijo").Get("idAtt").Add("Otro").Set("Prueba1")
 
-		for _, e := range ent.Atributes {
-			print(e, "")
-		}
-		fmt.Println("=======================================")
-	*/
-}
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-func parse(json map[string]interface{}, path string) interface{} {
-	pt := strings.Split(path, "/")
-	var ok bool
-	var tmp map[string]interface{}
-	var ret interface{}
-	for _, p := range pt {
-		if p == "" {
-			continue
-		}
-		ret = nil
+	ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
 
-		tmp, ok = json[p].(map[string]interface{})
-		if !ok {
-			ret, ok = json[p].(interface{})
-		} else {
-			json = tmp
-			ret = tmp
-		}
-	}
-	return ret
-}
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-func print(e *entity.Attribute, space string) {
-	fmt.Println(space + "=======================================")
-	fmt.Println(space + e.FieldDefinition.Name)
-	fmt.Println(space + e.FieldDefinition.Type)
-	fmt.Print(space)
-	fmt.Println(e.Value)
-	if e.Child != nil {
-		for _, e1 := range e.Child {
-			print(e1, space+"\t")
-		}
-	}
 }

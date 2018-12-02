@@ -1,0 +1,52 @@
+package entities
+
+import (
+	"encoding/json"
+	"log"
+	"path/filepath"
+
+	schema "github.com/lestrrat/go-jsschema"
+	"github.com/lestrrat/go-jsschema/validator"
+)
+
+// Definition Define de una Entidad
+type Definition struct {
+	schema    *schema.Schema
+	validator *validator.Validator
+}
+
+// Load Lectura de la definicion de una entidad
+func (e *Definition) Load(path, entity string) error {
+
+	fullPath := filepath.Join(path, entity+".json")
+	s, err := schema.ReadFile(fullPath)
+	if err != nil {
+		log.Printf("failed to read schema: %s", err)
+		return err
+	}
+
+	e.schema = s
+	v := validator.New(s)
+	e.validator = v
+	return nil
+}
+
+// Validate Valida un json en base al schema
+func (e *Definition) Validate(sjson string) (map[string]interface{}, error) {
+	var ojson map[string]interface{}
+	err := json.Unmarshal([]byte(sjson), &ojson)
+	if err != nil {
+		return nil, err
+	}
+	err = e.validator.Validate(ojson)
+	return ojson, err
+}
+
+// New nueva entidad en base a un json
+func (e *Definition) New(sjson string) (*Entity, error) {
+	ojson, err := e.Validate(sjson)
+	if err != nil {
+		return nil, err
+	}
+	return &Entity{e, ojson}, nil
+}
