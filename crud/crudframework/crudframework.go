@@ -3,10 +3,15 @@ package crudframework
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/coc1961/go/crud/entity"
+
+	"github.com/lestrrat/go-jsschema"
+	"github.com/lestrrat/go-jsschema/validator"
 )
 
 // Test Prueba
@@ -28,21 +33,76 @@ func Test() {
 			"hijo": {
 				"idAtt": "cc23",
                 "nameAtt": "AttrHijo"
-			}
+			},
+			"soyArray": [
+				"elem1",
+				"elem2"
+			]
 		}
 			`
 	var ojson map[string]interface{}
 	err = json.Unmarshal([]byte(sjson), &ojson)
 
-	var ent *entity.Entity
-	ent, err = e.Parse(ojson)
-
-	fmt.Println("******* " + ent.Name + " *******")
-
-	for _, e := range ent.Atributes {
-		print(e, "")
+	s, err := schema.ReadFile(dir + "/data/pruebaschema.json")
+	if err != nil {
+		log.Printf("failed to read schema: %s", err)
+		return
 	}
-	fmt.Println("=======================================")
+
+	for name, pdef := range s.Properties {
+		// Do what you will with `pdef`, which contain
+		// Schema information for `name` property
+		fmt.Println(name)
+		fmt.Println(pdef)
+	}
+
+	// You can also validate an arbitrary piece of data
+
+	v := validator.New(s)
+	if err := v.Validate(ojson); err != nil {
+		log.Printf("failed to validate data: %s", err)
+	}
+
+	fmt.Println(parse(ojson, "/hijo/idAtt"))
+	fmt.Println(parse(ojson, "/soyArray"))
+
+	/*
+		var ent *entity.Entity
+		ent, err = e.Parse(ojson)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("******* " + ent.Name + " *******")
+
+		for _, e := range ent.Atributes {
+			print(e, "")
+		}
+		fmt.Println("=======================================")
+	*/
+}
+
+func parse(json map[string]interface{}, path string) interface{} {
+	pt := strings.Split(path, "/")
+	var ok bool
+	var tmp map[string]interface{}
+	var ret interface{}
+	for _, p := range pt {
+		if p == "" {
+			continue
+		}
+		ret = nil
+
+		tmp, ok = json[p].(map[string]interface{})
+		if !ok {
+			ret, ok = json[p].(interface{})
+		} else {
+			json = tmp
+			ret = tmp
+		}
+	}
+	return ret
 }
 
 func print(e *entity.Attribute, space string) {

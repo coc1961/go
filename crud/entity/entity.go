@@ -73,6 +73,12 @@ func newField(name string, fld map[string]interface{}) *FieldDefinition {
 		}
 
 	}
+	if f.Type == "array" {
+		arrList := fld["items"].(map[string]interface{})
+		f.Child = make(map[string]*FieldDefinition)
+		f.Child["items"] = newField("items", arrList)
+
+	}
 	return &f
 }
 
@@ -155,6 +161,21 @@ func (e *Definition) fields(parent map[string]*FieldDefinition, json map[string]
 				return nil, err
 			}
 		}
+		if fld.Type == "array" {
+			var err error
+			attr.Value = nil
+			arr := value.([]interface{})
+			for _, ele := range arr {
+				fl := fld.Child["items"]
+				if fl.Type == "object" {
+					attr.Child, err = e.fields(fld.Child, ele.(map[string]interface{}))
+				}
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+
 	}
 	return attributes, nil
 }
@@ -185,6 +206,9 @@ func validateValue(fld *FieldDefinition, value interface{}) bool {
 		return ok
 	case "object":
 		_, ok := getMap(value)
+		return ok
+	case "array":
+		ok := true
 		return ok
 	}
 	return false
