@@ -1,5 +1,9 @@
 package entities
 
+import (
+	"encoding/json"
+)
+
 // Entity representa una entidad del crud
 type Entity struct {
 	definition *Definition
@@ -15,6 +19,15 @@ func (e *Entity) Get(attName string) *Attribute {
 	pt := make([]string, 1)
 	pt = append(pt, attName)
 	return &Attribute{tmp, e, pt}
+}
+
+// JSON return the json
+func (e *Entity) JSON() string {
+	b, err := json.Marshal(e.json)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }
 
 // Attribute Reprernta un atributo
@@ -61,8 +74,8 @@ func (e *Attribute) Set(value interface{}) {
 	(*json)[lastPt] = value
 }
 
-// Add add attribute value
-func (e *Attribute) Add(attName string) *Attribute {
+// AddObject add attribute value
+func (e *Attribute) AddObject(attName string) *Attribute {
 	tmp := make(map[string]interface{})
 	tmp[attName] = ""
 	e.Set(tmp)
@@ -76,54 +89,3 @@ func (e *Attribute) Add(attName string) *Attribute {
 func (e *Attribute) Value() interface{} {
 	return e.json
 }
-
-/*
-// Get get json value
-func (e *Entity) Get(path string) interface{} {
-	json := e.json
-	pt := strings.Split(path, "/")
-	var ok bool
-	var tmp map[string]interface{}
-	var ret interface{}
-	for _, p := range pt {
-		if p == "" {
-			continue
-		}
-		ret = nil
-
-		tmp, ok = json[p].(map[string]interface{})
-		if !ok {
-			ret, ok = json[p].(interface{})
-		} else {
-			json = tmp
-			ret = tmp
-		}
-	}
-	return ret
-}
-
-// Set set json value
-func (e *Entity) Set(path string, value interface{}) {
-	json := &e.json
-	pt := strings.Split(path, "/")
-	cont := len(pt)
-	var lastPt string
-	for _, p := range pt {
-		cont--
-		if p == "" {
-			continue
-		}
-		if cont == 0 {
-			lastPt = p
-			break
-		}
-		tt := (*json)[p]
-		t, ok := tt.(map[string]interface{})
-		if !ok {
-			return
-		}
-		json = &t
-	}
-	(*json)[lastPt] = value
-}
-*/

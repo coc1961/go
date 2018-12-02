@@ -61,4 +61,5 @@ func Test() {
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
+	fmt.Println(ent.JSON())
 }
