@@ -47,13 +47,15 @@ func Test() {
 	var ent *entities.Entity
 	ent, err = e.New(sjson)
 
+	fmt.Println(ent.Get("soyArray").Value())
+
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
 	ent.Get("hijo").Get("idAtt").Set("Prueba")
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-	ent.Get("hijo").Get("idAtt").Add("Otro").Set("Prueba1")
+	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
@@ -62,4 +64,29 @@ func Test() {
 	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
 	fmt.Println(ent.JSON())
+
+	fmt.Println("=============================================================")
+
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+
+	ent.Get("hijo").Get("idAtt").Set("Prueba")
+
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+
+	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
+
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+
+	ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
+
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+
+	fmt.Println(ent.JSON())
+
+	ent.Get("name").Set("Soy Nombre")
+
+	fmt.Println(ent.Get("name").Value())
+
+	fmt.Println(ent.JSON())
+
 }
