@@ -9,11 +9,6 @@ type MJson struct {
 	path       []string
 }
 
-// NewFromParent creo un objeto MJson
-func NewFromParent(localValue interface{}, rootValue *map[string]interface{}, path []string) *MJson {
-	return &MJson{localValue, rootValue, path}
-}
-
 // New creo un objeto MJson
 func New(sjson string) *MJson {
 	pt := make([]string, 1)
@@ -23,6 +18,24 @@ func New(sjson string) *MJson {
 		return nil
 	}
 	return &MJson{nil, &entity, pt}
+}
+
+// SetValue setea el valor local
+func (e *MJson) SetValue(localValue interface{}) *MJson {
+	e.localValue = localValue
+	return e
+}
+
+// SetRootValue setea el valor del root
+func (e *MJson) SetRootValue(rootValue *map[string]interface{}) *MJson {
+	e.rootValue = rootValue
+	return e
+}
+
+// SetPath setea el valor del path
+func (e *MJson) SetPath(path []string) *MJson {
+	e.path = path
+	return e
 }
 
 // Get get attribute value
