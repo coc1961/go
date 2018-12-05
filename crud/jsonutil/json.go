@@ -62,12 +62,38 @@ func (e *MJson) SetPath(path []string) *MJson {
 func (e *MJson) Get(attName string) *MJson {
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
-	ret, ok := e.localValue.(map[string]interface{})
+	tmp := e.internalGet()
+	ret, ok := (*tmp).(map[string]interface{})
 	if ok {
 		localValue := ret[attName]
 		return &MJson{localValue, e.rootValue, tmpPath}
 	}
 	return nil
+}
+
+func (e *MJson) internalGet() *interface{} {
+	json := e.rootValue
+	path := e.path
+	pathLen := len(path)
+	var lastPt string
+	for _, p := range path {
+		pathLen--
+		if p == "" {
+			continue
+		}
+		if pathLen == 0 {
+			lastPt = p
+			break
+		}
+		tmpInterface := (*json)[p]
+		tmpMap, ok := tmpInterface.(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		json = &tmpMap
+	}
+	ret := (*json)[lastPt]
+	return &ret
 }
 
 // Set set attribute value

@@ -75,6 +75,8 @@ func Test() {
 	ent.Get("arrayOnject").Set(tmp)
 	fmt.Println(ent.JSON())
 
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+
 	/*
 		fmt.Println(ent.Get("soyArray").Value())
 
