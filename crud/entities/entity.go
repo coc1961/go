@@ -3,7 +3,7 @@ package entities
 import (
 	"encoding/json"
 
-	"github.com/coc1961/go/crud/util"
+	"github.com/coc1961/go/crud/jsonutil"
 )
 
 // Entity representa una entidad del crud
@@ -13,22 +13,22 @@ type Entity struct {
 }
 
 // Get get attribute value
-func (e *Entity) Get(attName string) *util.MJson {
+func (e *Entity) Get(attName string) *jsonutil.MJson {
 	tmp := e.json[attName]
 	if tmp == nil {
 		return nil
 	}
 	pt := make([]string, 1)
 	pt = append(pt, attName)
-	return util.NewFromString("{}").SetValue(tmp).SetRootValue(&e.json).SetPath(pt)
+	return jsonutil.New().SetValue(tmp).SetRootValue(&e.json).SetPath(pt)
 }
 
 // AddObject add attribute value
-func (e *Entity) AddObject(attName string) *util.MJson {
+func (e *Entity) AddObject(attName string) *jsonutil.MJson {
 	e.json[attName] = ""
 	tmpPath := make([]string, 1)
 	tmpPath = append(tmpPath, attName)
-	return util.NewFromString("{}").SetValue(e.json[attName]).SetRootValue(&e.json).SetPath(tmpPath)
+	return jsonutil.New().SetValue(e.json[attName]).SetRootValue(&e.json).SetPath(tmpPath)
 }
 
 // JSON return the json

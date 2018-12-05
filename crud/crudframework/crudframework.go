@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/coc1961/go/crud/entities"
-	"github.com/coc1961/go/crud/util"
+	"github.com/coc1961/go/crud/jsonutil"
 )
 
 // Test Prueba
@@ -58,7 +58,7 @@ func Test() {
 	var ent *entities.Entity
 	ent, err = e.New(sjson)
 
-	ent1 := util.New()
+	ent1 := jsonutil.New()
 
 	ent1.AddObject("Prueba").Set("Hola Men")
 
@@ -66,7 +66,7 @@ func Test() {
 
 	fmt.Println(ent.JSON())
 
-	ent2 := util.New()
+	ent2 := jsonutil.New()
 	ent2.AddObject("id").Set("788")
 	ent2.AddObject("name").Set("Nombre2")
 
