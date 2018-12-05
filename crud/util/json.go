@@ -11,6 +11,13 @@ type MJson struct {
 	path       []string
 }
 
+// New creo un objeto MJson vacio
+func New() *MJson {
+	pt := make([]string, 0)
+	entity := make(map[string]interface{})
+	return &MJson{nil, &entity, pt}
+}
+
 // NewFromMap creo un objeto MJson
 func NewFromMap(rootValue *map[string]interface{}) *MJson {
 	pt := make([]string, 0)

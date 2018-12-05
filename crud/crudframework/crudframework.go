@@ -58,7 +58,7 @@ func Test() {
 	var ent *entities.Entity
 	ent, err = e.New(sjson)
 
-	ent1 := util.NewFromString("{}")
+	ent1 := util.New()
 
 	ent1.AddObject("Prueba").Set("Hola Men")
 
@@ -66,7 +66,7 @@ func Test() {
 
 	fmt.Println(ent.JSON())
 
-	ent2 := util.NewFromString("{}")
+	ent2 := util.New()
 	ent2.AddObject("id").Set("788")
 	ent2.AddObject("name").Set("Nombre2")
 
