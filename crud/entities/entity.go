@@ -20,7 +20,15 @@ func (e *Entity) Get(attName string) *util.MJson {
 	}
 	pt := make([]string, 1)
 	pt = append(pt, attName)
-	return util.New("{}").SetValue(tmp).SetRootValue(&e.json).SetPath(pt)
+	return util.NewFromString("{}").SetValue(tmp).SetRootValue(&e.json).SetPath(pt)
+}
+
+// AddObject add attribute value
+func (e *Entity) AddObject(attName string) *util.MJson {
+	e.json[attName] = ""
+	tmpPath := make([]string, 1)
+	tmpPath = append(tmpPath, attName)
+	return util.NewFromString("{}").SetValue(e.json[attName]).SetRootValue(&e.json).SetPath(tmpPath)
 }
 
 // JSON return the json

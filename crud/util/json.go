@@ -1,6 +1,8 @@
 package util
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // MJson Reprernta un atributo
 type MJson struct {
@@ -9,15 +11,26 @@ type MJson struct {
 	path       []string
 }
 
-// New creo un objeto MJson
-func New(sjson string) *MJson {
-	pt := make([]string, 1)
+// NewFromMap creo un objeto MJson
+func NewFromMap(rootValue *map[string]interface{}) *MJson {
+	pt := make([]string, 0)
+	return &MJson{nil, rootValue, pt}
+}
+
+// NewFromString creo un objeto MJson
+func NewFromString(sjson string) *MJson {
+	pt := make([]string, 0)
 	var entity map[string]interface{}
 	err := json.Unmarshal([]byte(sjson), &entity)
 	if err != nil {
 		return nil
 	}
 	return &MJson{nil, &entity, pt}
+}
+
+// GetRoot retorna el map interno
+func (e *MJson) GetRoot() *map[string]interface{} {
+	return e.rootValue
 }
 
 // SetValue setea el valor local
@@ -52,6 +65,10 @@ func (e *MJson) Get(attName string) *MJson {
 
 // Set set attribute value
 func (e *MJson) Set(value interface{}) {
+	tmp, ok := value.(*MJson)
+	if ok {
+		value = tmp.rootValue
+	}
 	json := e.rootValue
 	path := e.path
 	pathLen := len(path)
@@ -72,7 +89,13 @@ func (e *MJson) Set(value interface{}) {
 		}
 		json = &tmpMap
 	}
-	(*json)[lastPt] = value
+	if len(path) == 0 {
+		for k, v := range value.(map[string]interface{}) {
+			(*json)[k] = v
+		}
+	} else {
+		(*json)[lastPt] = value
+	}
 }
 
 // AddObject add attribute value
@@ -88,4 +111,13 @@ func (e *MJson) AddObject(attName string) *MJson {
 // Value get attribute value
 func (e *MJson) Value() interface{} {
 	return e.localValue
+}
+
+// ValueAsArray get attribute value
+func (e *MJson) ValueAsArray() []interface{} {
+	ret, ok := e.localValue.([]interface{})
+	if ok {
+		return ret
+	}
+	return nil
 }
