@@ -70,6 +70,8 @@ func Test() {
 	ent2.AddObject("id").Set("788")
 	ent2.AddObject("name").Set("Nombre2")
 
+	fmt.Println(ent2.Get("id").Value())
+
 	tmp := ent.Get("arrayOnject").ValueAsArray()
 	tmp = append(tmp, ent2.GetRoot())
 	ent.Get("arrayOnject").Set(tmp)
@@ -77,47 +79,46 @@ func Test() {
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-	/*
-		fmt.Println(ent.Get("soyArray").Value())
+	fmt.Println(ent.Get("soyArray").Value())
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-		ent.Get("hijo").Get("idAtt").Set("Prueba")
+	ent.Get("hijo").Get("idAtt").Set("Prueba")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-		ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
+	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-		ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
+	ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-		fmt.Println(ent.JSON())
+	fmt.Println(ent.JSON())
 
-		fmt.Println("=============================================================")
+	fmt.Println("=============================================================")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-		ent.Get("hijo").Get("idAtt").Set("Prueba")
+	ent.Get("hijo").Get("idAtt").Set("Prueba")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-		ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
+	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-		ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
+	ent.Get("hijo").Get("idAtt").Get("Otro").Set("Prueba2")
 
-		fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
+	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
-		fmt.Println(ent.JSON())
+	fmt.Println(ent.JSON())
 
-		ent.Get("name").Set("Soy Nombre")
+	ent.Get("name").Set("Soy Nombre")
 
-		fmt.Println(ent.Get("name").Value())
+	fmt.Println(ent.Get("name").Value())
 
-		fmt.Println(ent.JSON())
-	*/
+	fmt.Println(ent.JSON())
+
 }

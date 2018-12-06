@@ -6,22 +6,21 @@ import (
 
 // MJson Reprernta un atributo
 type MJson struct {
-	localValue interface{}
-	rootValue  *map[string]interface{}
-	path       []string
+	rootValue *map[string]interface{}
+	path      []string
 }
 
 // New creo un objeto MJson vacio
 func New() *MJson {
 	pt := make([]string, 0)
 	entity := make(map[string]interface{})
-	return &MJson{nil, &entity, pt}
+	return &MJson{&entity, pt}
 }
 
 // NewFromMap creo un objeto MJson
 func NewFromMap(rootValue *map[string]interface{}) *MJson {
 	pt := make([]string, 0)
-	return &MJson{nil, rootValue, pt}
+	return &MJson{rootValue, pt}
 }
 
 // NewFromString creo un objeto MJson
@@ -32,18 +31,12 @@ func NewFromString(sjson string) *MJson {
 	if err != nil {
 		return nil
 	}
-	return &MJson{nil, &entity, pt}
+	return &MJson{&entity, pt}
 }
 
 // GetRoot retorna el map interno
 func (e *MJson) GetRoot() *map[string]interface{} {
 	return e.rootValue
-}
-
-// SetValue setea el valor local
-func (e *MJson) SetValue(localValue interface{}) *MJson {
-	e.localValue = localValue
-	return e
 }
 
 // SetRootValue setea el valor del root
@@ -52,21 +45,18 @@ func (e *MJson) SetRootValue(rootValue *map[string]interface{}) *MJson {
 	return e
 }
 
-// SetPath setea el valor del path
-func (e *MJson) SetPath(path []string) *MJson {
-	e.path = path
-	return e
-}
-
 // Get get attribute value
 func (e *MJson) Get(attName string) *MJson {
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
-	tmp := e.internalGet()
-	ret, ok := (*tmp).(map[string]interface{})
-	if ok {
-		localValue := ret[attName]
-		return &MJson{localValue, e.rootValue, tmpPath}
+	if len(e.path) == 0 {
+		return &MJson{e.rootValue, tmpPath}
+	} else {
+		tmp := e.internalGet()
+		_, ok := (*tmp).(map[string]interface{})
+		if ok {
+			return &MJson{e.rootValue, tmpPath}
+		}
 	}
 	return nil
 }
@@ -138,17 +128,25 @@ func (e *MJson) AddObject(attName string) *MJson {
 	e.Set(tmpObject)
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
-	return &MJson{tmpObject[attName], e.rootValue, tmpPath}
+	return &MJson{e.rootValue, tmpPath}
 }
 
 // Value get attribute value
 func (e *MJson) Value() interface{} {
-	return e.localValue
+	ret := e.internalGet()
+	if ret == nil {
+		return nil
+	}
+	return *ret
 }
 
 // ValueAsArray get attribute value
 func (e *MJson) ValueAsArray() []interface{} {
-	ret, ok := e.localValue.([]interface{})
+	tmpValue := e.Value()
+	if tmpValue == nil {
+		return nil
+	}
+	ret, ok := (tmpValue).([]interface{})
 	if ok {
 		return ret
 	}
