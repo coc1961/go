@@ -72,6 +72,8 @@ func Test() {
 
 	fmt.Println(ent2.Get("id").Value())
 
+	fmt.Println(ent2.Get("id").Get("NoEsta").Get("NoEsta2").Value())
+
 	tmp := ent.Get("arrayOnject").ValueAsArray()
 	tmp = append(tmp, ent2.GetRoot())
 	ent.Get("arrayOnject").Set(tmp)

@@ -45,6 +45,12 @@ func (e *MJson) SetRootValue(rootValue *map[string]interface{}) *MJson {
 	return e
 }
 
+func nullMJson() *MJson {
+	tmp := make(map[string]interface{})
+	pt := make([]string, 0)
+	return &MJson{&tmp, pt}
+}
+
 // Get get attribute value
 func (e *MJson) Get(attName string) *MJson {
 	tmpPath := e.path
@@ -58,7 +64,7 @@ func (e *MJson) Get(attName string) *MJson {
 			return &MJson{e.rootValue, tmpPath}
 		}
 	}
-	return nil
+	return nullMJson()
 }
 
 func (e *MJson) internalGet() *interface{} {
