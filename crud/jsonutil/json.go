@@ -59,9 +59,11 @@ func (e *MJson) Get(attName string) *MJson {
 		return &MJson{e.rootValue, tmpPath}
 	} else {
 		tmp := e.internalGet()
-		_, ok := (*tmp).(map[string]interface{})
-		if ok {
-			return &MJson{e.rootValue, tmpPath}
+		if tmp != nil {
+			_, ok := (*tmp).(map[string]interface{})
+			if ok {
+				return &MJson{e.rootValue, tmpPath}
+			}
 		}
 	}
 	return nullMJson()
