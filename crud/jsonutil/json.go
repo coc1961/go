@@ -102,8 +102,18 @@ func (e *JSON) Set(value interface{}) *JSON {
 	}
 	json, lastPt := e.parentPath()
 	if len(e.path) == 0 {
-		for k, v := range value.(map[string]interface{}) {
-			(*json)[k] = v
+		tmpArr, okArr := value.(map[string]interface{})
+		if okArr {
+			for k, v := range tmpArr {
+				(*json)[k] = v
+			}
+		} else {
+			tmpArr, okArr := value.(*map[string]interface{})
+			if okArr {
+				for k, v := range *tmpArr {
+					(*json)[k] = v
+				}
+			}
 		}
 	} else {
 		(*json)[lastPt] = value

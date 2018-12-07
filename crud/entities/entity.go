@@ -55,7 +55,7 @@ func (e *Definition) New(sjson string) (*Entity, error) {
 
 /***************************
 * Entity
- */
+****************************/
 
 // Entity representa una entidad del crud
 type Entity struct {
