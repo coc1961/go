@@ -60,15 +60,15 @@ func Test() {
 
 	ent1 := jsonutil.New()
 
-	ent1.AddObject("Prueba").Set("Hola Men")
+	ent1.Add("Prueba").Set("Hola Men")
 
-	ent.AddObject("Nuevo").Set(ent1)
+	ent.Add("Nuevo").Set(ent1)
 
 	fmt.Println(ent.JSON())
 
 	ent2 := jsonutil.New()
-	ent2.AddObject("id").Set("788")
-	ent2.AddObject("name").Set("Nombre2")
+	ent2.Add("id").Set("788")
+	ent2.Add("name").Set("Nombre2")
 
 	fmt.Println(ent2.Get("id").Value())
 
@@ -89,7 +89,7 @@ func Test() {
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
+	ent.Get("hijo").Get("idAtt").Add("Otro").Set("Prueba1")
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 
@@ -107,7 +107,7 @@ func Test() {
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
-	ent.Get("hijo").Get("idAtt").AddObject("Otro").Set("Prueba1")
+	ent.Get("hijo").Get("idAtt").Add("Otro").Set("Prueba1")
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Get("Otro").Value())
 

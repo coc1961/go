@@ -5,6 +5,7 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/coc1961/go/crud/jsonutil"
 	schema "github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsschema/validator"
 )
@@ -48,5 +49,6 @@ func (e *Definition) New(sjson string) (*Entity, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Entity{e, ojson}, nil
+	data := jsonutil.New().SetRootValue(&ojson)
+	return &Entity{e, data}, nil
 }

@@ -9,31 +9,23 @@ import (
 // Entity representa una entidad del crud
 type Entity struct {
 	definition *Definition
-	json       map[string]interface{}
+	//	json       map[string]interface{}
+	data *jsonutil.MJson
 }
 
 // Get get attribute value
 func (e *Entity) Get(attName string) *jsonutil.MJson {
-	tmp := e.json[attName]
-	if tmp == nil {
-		return nil
-	}
-	pt := make([]string, 0)
-	pt = append(pt, attName)
-	return jsonutil.New().SetRootValue(&e.json).Get(attName)
+	return e.data.Get(attName)
 }
 
-// AddObject add attribute value
-func (e *Entity) AddObject(attName string) *jsonutil.MJson {
-	e.json[attName] = ""
-	tmpPath := make([]string, 0)
-	tmpPath = append(tmpPath, attName)
-	return jsonutil.New().SetRootValue(&e.json).AddObject(attName)
+// Add add attribute value
+func (e *Entity) Add(attName string) *jsonutil.MJson {
+	return e.data.Add(attName)
 }
 
 // JSON return the json
 func (e *Entity) JSON() string {
-	b, err := json.Marshal(e.json)
+	b, err := json.Marshal(e.data.GetRoot())
 	if err != nil {
 		return ""
 	}

@@ -10,6 +10,10 @@ type MJson struct {
 	path      []string
 }
 
+/******************
+** Factory
+*******************/
+
 // New creo un objeto MJson vacio
 func New() *MJson {
 	pt := make([]string, 0)
@@ -34,6 +38,10 @@ func NewFromString(sjson string) *MJson {
 	return &MJson{&entity, pt}
 }
 
+/******************
+** Getter y Setter
+*******************/
+
 // GetRoot retorna el map interno
 func (e *MJson) GetRoot() *map[string]interface{} {
 	return e.rootValue
@@ -45,11 +53,28 @@ func (e *MJson) SetRootValue(rootValue *map[string]interface{}) *MJson {
 	return e
 }
 
+// JSON return the json
+func (e *MJson) JSON() string {
+	b, err := json.Marshal(e.GetRoot())
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+/******************
+** Invalid Object
+*******************/
+
 func nullMJson() *MJson {
 	tmp := make(map[string]interface{})
 	pt := make([]string, 0)
 	return &MJson{&tmp, pt}
 }
+
+/**********************
+** Get and Set Values
+***********************/
 
 // Get get attribute value
 func (e *MJson) Get(attName string) *MJson {
@@ -69,58 +94,14 @@ func (e *MJson) Get(attName string) *MJson {
 	return nullMJson()
 }
 
-func (e *MJson) internalGet() *interface{} {
-	json := e.rootValue
-	path := e.path
-	pathLen := len(path)
-	var lastPt string
-	for _, p := range path {
-		pathLen--
-		if p == "" {
-			continue
-		}
-		if pathLen == 0 {
-			lastPt = p
-			break
-		}
-		tmpInterface := (*json)[p]
-		tmpMap, ok := tmpInterface.(map[string]interface{})
-		if !ok {
-			return nil
-		}
-		json = &tmpMap
-	}
-	ret := (*json)[lastPt]
-	return &ret
-}
-
 // Set set attribute value
 func (e *MJson) Set(value interface{}) {
 	tmp, ok := value.(*MJson)
 	if ok {
 		value = tmp.rootValue
 	}
-	json := e.rootValue
-	path := e.path
-	pathLen := len(path)
-	var lastPt string
-	for _, p := range path {
-		pathLen--
-		if p == "" {
-			continue
-		}
-		if pathLen == 0 {
-			lastPt = p
-			break
-		}
-		tmpInterface := (*json)[p]
-		tmpMap, ok := tmpInterface.(map[string]interface{})
-		if !ok {
-			return
-		}
-		json = &tmpMap
-	}
-	if len(path) == 0 {
+	json, lastPt := e.parentPath()
+	if len(e.path) == 0 {
 		for k, v := range value.(map[string]interface{}) {
 			(*json)[k] = v
 		}
@@ -129,8 +110,8 @@ func (e *MJson) Set(value interface{}) {
 	}
 }
 
-// AddObject add attribute value
-func (e *MJson) AddObject(attName string) *MJson {
+// Add add attribute value
+func (e *MJson) Add(attName string) *MJson {
 	tmpObject := make(map[string]interface{})
 	tmpObject[attName] = ""
 	e.Set(tmpObject)
@@ -138,6 +119,10 @@ func (e *MJson) AddObject(attName string) *MJson {
 	tmpPath = append(tmpPath, attName)
 	return &MJson{e.rootValue, tmpPath}
 }
+
+/******************
+** Object Value
+*******************/
 
 // Value get attribute value
 func (e *MJson) Value() interface{} {
@@ -159,4 +144,40 @@ func (e *MJson) ValueAsArray() []interface{} {
 		return ret
 	}
 	return nil
+}
+
+/**********************
+** Internal Functions
+***********************/
+
+// Valor del Objeto
+func (e *MJson) internalGet() *interface{} {
+	tmp, lastPt := e.parentPath()
+	tmp1 := (*tmp)[lastPt]
+	return &tmp1
+}
+
+// map del parent y nombre del atributo del objeto actual
+func (e *MJson) parentPath() (*map[string]interface{}, string) {
+	json := e.rootValue
+	path := e.path
+	pathLen := len(path)
+	var lastPt string
+	for _, p := range path {
+		pathLen--
+		if p == "" {
+			continue
+		}
+		if pathLen == 0 {
+			lastPt = p
+			break
+		}
+		tmpInterface := (*json)[p]
+		tmpMap, ok := tmpInterface.(map[string]interface{})
+		if !ok {
+			return nil, ""
+		}
+		json = &tmpMap
+	}
+	return json, lastPt
 }
