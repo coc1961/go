@@ -95,7 +95,7 @@ func (e *MJson) Get(attName string) *MJson {
 }
 
 // Set set attribute value
-func (e *MJson) Set(value interface{}) {
+func (e *MJson) Set(value interface{}) *MJson {
 	tmp, ok := value.(*MJson)
 	if ok {
 		value = tmp.rootValue
@@ -108,6 +108,7 @@ func (e *MJson) Set(value interface{}) {
 	} else {
 		(*json)[lastPt] = value
 	}
+	return e
 }
 
 // Add add attribute value

@@ -1,16 +1,13 @@
 package entities
 
 import (
-	"encoding/json"
-
 	"github.com/coc1961/go/crud/jsonutil"
 )
 
 // Entity representa una entidad del crud
 type Entity struct {
 	definition *Definition
-	//	json       map[string]interface{}
-	data *jsonutil.MJson
+	data       *jsonutil.MJson
 }
 
 // Get get attribute value
@@ -25,9 +22,5 @@ func (e *Entity) Add(attName string) *jsonutil.MJson {
 
 // JSON return the json
 func (e *Entity) JSON() string {
-	b, err := json.Marshal(e.data.GetRoot())
-	if err != nil {
-		return ""
-	}
-	return string(b)
+	return e.data.JSON()
 }
