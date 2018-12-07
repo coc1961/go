@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 )
 
-// MJson Reprernta un atributo
-type MJson struct {
+// JSON Reprernta un Json
+type JSON struct {
 	rootValue *map[string]interface{}
 	path      []string
 }
@@ -15,27 +15,27 @@ type MJson struct {
 *******************/
 
 // New creo un objeto MJson vacio
-func New() *MJson {
+func New() *JSON {
 	pt := make([]string, 0)
 	entity := make(map[string]interface{})
-	return &MJson{&entity, pt}
+	return &JSON{&entity, pt}
 }
 
 // NewFromMap creo un objeto MJson
-func NewFromMap(rootValue *map[string]interface{}) *MJson {
+func NewFromMap(rootValue *map[string]interface{}) *JSON {
 	pt := make([]string, 0)
-	return &MJson{rootValue, pt}
+	return &JSON{rootValue, pt}
 }
 
 // NewFromString creo un objeto MJson
-func NewFromString(sjson string) *MJson {
+func NewFromString(sjson string) *JSON {
 	pt := make([]string, 0)
 	var entity map[string]interface{}
 	err := json.Unmarshal([]byte(sjson), &entity)
 	if err != nil {
 		return nil
 	}
-	return &MJson{&entity, pt}
+	return &JSON{&entity, pt}
 }
 
 /******************
@@ -43,18 +43,18 @@ func NewFromString(sjson string) *MJson {
 *******************/
 
 // GetRoot retorna el map interno
-func (e *MJson) GetRoot() *map[string]interface{} {
+func (e *JSON) GetRoot() *map[string]interface{} {
 	return e.rootValue
 }
 
 // SetRootValue setea el valor del root
-func (e *MJson) SetRootValue(rootValue *map[string]interface{}) *MJson {
+func (e *JSON) SetRootValue(rootValue *map[string]interface{}) *JSON {
 	e.rootValue = rootValue
 	return e
 }
 
 // JSON return the json
-func (e *MJson) JSON() string {
+func (e *JSON) JSON() string {
 	b, err := json.Marshal(e.GetRoot())
 	if err != nil {
 		return ""
@@ -66,10 +66,10 @@ func (e *MJson) JSON() string {
 ** Invalid Object
 *******************/
 
-func nullMJson() *MJson {
+func nullMJson() *JSON {
 	tmp := make(map[string]interface{})
 	pt := make([]string, 0)
-	return &MJson{&tmp, pt}
+	return &JSON{&tmp, pt}
 }
 
 /**********************
@@ -77,17 +77,17 @@ func nullMJson() *MJson {
 ***********************/
 
 // Get get attribute value
-func (e *MJson) Get(attName string) *MJson {
+func (e *JSON) Get(attName string) *JSON {
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
 	if len(e.path) == 0 {
-		return &MJson{e.rootValue, tmpPath}
+		return &JSON{e.rootValue, tmpPath}
 	} else {
 		tmp := e.internalValue()
 		if tmp != nil {
 			_, ok := (*tmp).(map[string]interface{})
 			if ok {
-				return &MJson{e.rootValue, tmpPath}
+				return &JSON{e.rootValue, tmpPath}
 			}
 		}
 	}
@@ -95,8 +95,8 @@ func (e *MJson) Get(attName string) *MJson {
 }
 
 // Set set attribute value
-func (e *MJson) Set(value interface{}) *MJson {
-	tmp, ok := value.(*MJson)
+func (e *JSON) Set(value interface{}) *JSON {
+	tmp, ok := value.(*JSON)
 	if ok {
 		value = tmp.rootValue
 	}
@@ -112,13 +112,13 @@ func (e *MJson) Set(value interface{}) *MJson {
 }
 
 // Add add attribute value
-func (e *MJson) Add(attName string) *MJson {
+func (e *JSON) Add(attName string) *JSON {
 	tmpObject := make(map[string]interface{})
 	tmpObject[attName] = ""
 	e.Set(tmpObject)
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
-	return &MJson{e.rootValue, tmpPath}
+	return &JSON{e.rootValue, tmpPath}
 }
 
 /******************
@@ -126,7 +126,7 @@ func (e *MJson) Add(attName string) *MJson {
 *******************/
 
 // Value get attribute value
-func (e *MJson) Value() interface{} {
+func (e *JSON) Value() interface{} {
 	ret := e.internalValue()
 	if ret == nil {
 		return nil
@@ -135,7 +135,7 @@ func (e *MJson) Value() interface{} {
 }
 
 // ValueAsArray get attribute value
-func (e *MJson) ValueAsArray() []interface{} {
+func (e *JSON) ValueAsArray() []interface{} {
 	tmpValue := e.Value()
 	if tmpValue == nil {
 		return nil
@@ -152,14 +152,14 @@ func (e *MJson) ValueAsArray() []interface{} {
 ***********************/
 
 // Valor del Objeto
-func (e *MJson) internalValue() *interface{} {
+func (e *JSON) internalValue() *interface{} {
 	tmp, lastPt := e.parentPath()
 	tmp1 := (*tmp)[lastPt]
 	return &tmp1
 }
 
 // map del parent y nombre del atributo del objeto actual
-func (e *MJson) parentPath() (*map[string]interface{}, string) {
+func (e *JSON) parentPath() (*map[string]interface{}, string) {
 	json := e.rootValue
 	path := e.path
 	pathLen := len(path)
