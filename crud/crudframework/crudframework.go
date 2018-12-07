@@ -78,6 +78,7 @@ func Test() {
 	tmp = append(tmp, ent2.GetRoot())
 	ent.Get("arrayOnject").Set(tmp)
 	fmt.Println(ent.JSON())
+	tmp = ent.Get("arrayOnject").ValueAsArray()
 
 	fmt.Println(ent.Get("hijo").Get("idAtt").Value())
 
