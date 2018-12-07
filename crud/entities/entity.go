@@ -49,7 +49,7 @@ func (e *Definition) New(sjson string) (*Entity, error) {
 	if err != nil {
 		return nil, err
 	}
-	data := jsonutil.New().Set(ojson)
+	data := jsonutil.New().Set(&ojson)
 	return &Entity{e, data}, nil
 }
 
