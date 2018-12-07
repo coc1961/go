@@ -83,7 +83,7 @@ func (e *MJson) Get(attName string) *MJson {
 	if len(e.path) == 0 {
 		return &MJson{e.rootValue, tmpPath}
 	} else {
-		tmp := e.internalGet()
+		tmp := e.internalValue()
 		if tmp != nil {
 			_, ok := (*tmp).(map[string]interface{})
 			if ok {
@@ -126,7 +126,7 @@ func (e *MJson) Add(attName string) *MJson {
 
 // Value get attribute value
 func (e *MJson) Value() interface{} {
-	ret := e.internalGet()
+	ret := e.internalValue()
 	if ret == nil {
 		return nil
 	}
@@ -151,7 +151,7 @@ func (e *MJson) ValueAsArray() []interface{} {
 ***********************/
 
 // Valor del Objeto
-func (e *MJson) internalGet() *interface{} {
+func (e *MJson) internalValue() *interface{} {
 	tmp, lastPt := e.parentPath()
 	tmp1 := (*tmp)[lastPt]
 	return &tmp1
