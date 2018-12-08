@@ -61,13 +61,3 @@ func TestJSON_Get(t *testing.T) {
 		}
 	})
 }
-
-func TestJSON_GetArray(t *testing.T) {
-	t.Run("Test Array of Object Get ", func(t *testing.T) {
-		json := NewFromString(sjson)
-		tmp := json.Get("arrayOnject").ValueAsArrayOfObjects()
-		if got := tmp[0].Get("id").Value().(float64); got != float64(123) {
-			t.Errorf("JSON.Get() = %v, want %v", got, 123)
-		}
-	})
-}
