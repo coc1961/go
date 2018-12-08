@@ -5,7 +5,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/coc1961/go/crud/jsonutil"
+	"github.com/coc1961/go/jsonutil"
 	schema "github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsschema/validator"
 )

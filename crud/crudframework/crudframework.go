@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/coc1961/go/crud/entities"
-	"github.com/coc1961/go/crud/jsonutil"
+	"github.com/coc1961/go/jsonutil"
 )
 
 // Test Prueba

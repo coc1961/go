@@ -1,4 +1,4 @@
-package entities
+package jsonutil
 
 import "time"
 

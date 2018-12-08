@@ -82,15 +82,15 @@ func (e *JSON) Get(attName string) *JSON {
 	tmpPath = append(tmpPath, attName)
 	if len(e.path) == 0 {
 		return &JSON{e.rootValue, tmpPath}
-	} else {
-		tmp := e.internalValue()
-		if tmp != nil {
-			_, ok := (*tmp).(map[string]interface{})
-			if ok {
-				return &JSON{e.rootValue, tmpPath}
-			}
+	}
+	tmp := e.internalValue()
+	if tmp != nil {
+		_, ok := (*tmp).(map[string]interface{})
+		if ok {
+			return &JSON{e.rootValue, tmpPath}
 		}
 	}
+
 	return nullMJson()
 }
 
