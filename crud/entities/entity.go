@@ -2,6 +2,7 @@ package entities
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"path/filepath"
 
@@ -14,13 +15,42 @@ import (
 type Definition struct {
 	schema    *schema.Schema
 	validator *validator.Validator
+	json      *jsonutil.JSON
+	byteRead  int
+}
+
+func (e *Definition) Read(p []byte) (n int, err error) {
+	str := e.json.Get("schema").JSON()
+	bt := []byte(str)
+	cont := len(p)
+	ind := 0
+	for i := e.byteRead; i < len(bt); i++ {
+		if ind >= cont {
+			break
+		}
+		p[ind] = bt[i]
+		ind++
+	}
+	e.byteRead += ind
+	n = ind
+	err = nil
+	return
 }
 
 // Load Lectura de la definicion de una entidad
 func (e *Definition) Load(path, entity string) error {
 
 	fullPath := filepath.Join(path, entity+".json")
-	s, err := schema.ReadFile(fullPath)
+
+	b, err := ioutil.ReadFile(fullPath)
+	if err != nil {
+		return err
+	}
+	content := string(b)
+	e.json = jsonutil.NewFromString(content)
+	e.byteRead = 0
+
+	s, err := schema.Read(e)
 	if err != nil {
 		log.Printf("failed to read schema: %s", err)
 		return err
