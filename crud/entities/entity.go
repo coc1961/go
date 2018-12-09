@@ -63,7 +63,7 @@ type Entity struct {
 	data       *jsonutil.JSON
 }
 
-// Set get attribute value
+// Set set attribute value
 func (e *Entity) Set(attName string) *jsonutil.JSON {
 	return e.data.Set(attName)
 }
