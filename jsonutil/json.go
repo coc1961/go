@@ -190,10 +190,7 @@ func (e *JSON) parentPath() (*map[string]interface{}, string) {
 			break
 		}
 		tmpInterface := (*json)[p]
-		tmpMap, ok := tmpInterface.(map[string]interface{})
-		if !ok {
-			return nil, ""
-		}
+		tmpMap, _ := tmpInterface.(map[string]interface{})
 		json = &tmpMap
 	}
 	return json, lastPt
