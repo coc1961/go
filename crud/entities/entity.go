@@ -11,7 +11,7 @@ import (
 	"github.com/lestrrat/go-jsschema/validator"
 )
 
-// Definition Define de una Entidad
+// Definition Define una Entidad
 type Definition struct {
 	schema    *schema.Schema
 	validator *validator.Validator
