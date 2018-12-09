@@ -38,7 +38,21 @@ func TestJSON_New(t *testing.T) {
 		if got := json.GetRoot(); len(*got) != 0 {
 			t.Errorf("JSON.Get() = %v, want %v", got, 0)
 		}
+		if got := json.JSON(); got != "{}" {
+			t.Errorf("JSON.Get() = %v, want %v", got, "{}")
+		}
 	})
+
+	t.Run("Test New New", func(t *testing.T) {
+		json := New()
+		mp := make(map[string]interface{}, 0)
+		mp["id"] = 1
+		json.SetRootValue(&mp)
+		if got := json.GetRoot(); len(*got) != 1 {
+			t.Errorf("JSON.Get() = %v, want %v", len(*got), 1)
+		}
+	})
+
 	t.Run("Test NewFromMap New", func(t *testing.T) {
 		mp := make(map[string]interface{})
 		mp["id"] = "1"

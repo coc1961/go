@@ -188,9 +188,6 @@ func (e *JSON) parentPath() (*map[string]interface{}, string) {
 	var lastPt string
 	for _, p := range path {
 		pathLen--
-		if p == "" {
-			continue
-		}
 		if pathLen == 0 {
 			lastPt = p
 			break
