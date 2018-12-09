@@ -8,6 +8,7 @@ import (
 type JSON struct {
 	rootValue *map[string]interface{}
 	path      []string
+	isNil     bool
 }
 
 /******************
@@ -18,13 +19,13 @@ type JSON struct {
 func New() *JSON {
 	pt := make([]string, 0)
 	entity := make(map[string]interface{})
-	return &JSON{&entity, pt}
+	return internalNew(&entity, pt, false)
 }
 
 // NewFromMap creo un objeto MJson
 func NewFromMap(rootValue *map[string]interface{}) *JSON {
 	pt := make([]string, 0)
-	return &JSON{rootValue, pt}
+	return internalNew(rootValue, pt, false)
 }
 
 // NewFromString creo un objeto MJson
@@ -35,7 +36,11 @@ func NewFromString(sjson string) *JSON {
 	if err != nil {
 		return nil
 	}
-	return &JSON{&entity, pt}
+	return internalNew(&entity, pt, false)
+}
+
+func internalNew(rootValue *map[string]interface{}, path []string, isNil bool) *JSON {
+	return &JSON{rootValue, path, isNil}
 }
 
 /******************
@@ -69,7 +74,7 @@ func (e *JSON) JSON() string {
 func nullMJson() *JSON {
 	tmp := make(map[string]interface{})
 	pt := make([]string, 0)
-	return &JSON{&tmp, pt}
+	return internalNew(&tmp, pt, true)
 }
 
 /**********************
@@ -81,13 +86,15 @@ func (e *JSON) Get(attName string) *JSON {
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
 	if len(e.path) == 0 {
-		return &JSON{e.rootValue, tmpPath}
+		if _, ok := (*e.rootValue)[attName]; ok {
+			return internalNew(e.rootValue, tmpPath, false)
+		}
 	}
 	tmp := e.internalValue()
 	if tmp != nil {
 		_, ok := (*tmp).(map[string]interface{})
 		if ok {
-			return &JSON{e.rootValue, tmpPath}
+			return internalNew(e.rootValue, tmpPath, false)
 		}
 	}
 
@@ -98,7 +105,7 @@ func (e *JSON) Get(attName string) *JSON {
 func (e *JSON) Set(value interface{}) *JSON {
 	tmp, ok := value.(*JSON)
 	if ok {
-		value = tmp.rootValue
+		value = *tmp.rootValue
 	}
 	json, lastPt := e.parentPath()
 	if len(e.path) == 0 {
@@ -128,12 +135,17 @@ func (e *JSON) Add(attName string) *JSON {
 	e.Set(tmpObject)
 	tmpPath := e.path
 	tmpPath = append(tmpPath, attName)
-	return &JSON{e.rootValue, tmpPath}
+	return internalNew(e.rootValue, tmpPath, false)
 }
 
 /******************
 ** Object Value
 *******************/
+
+// IsNil return if nil object
+func (e *JSON) IsNil() bool {
+	return e.isNil
+}
 
 // Value get attribute value
 func (e *JSON) Value() interface{} {

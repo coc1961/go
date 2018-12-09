@@ -7,12 +7,19 @@ import "time"
  ***************************************************************/
 
 // Convierto interface a tipo de valor
+
 func getInt(value interface{}) (ret int64, ok bool) {
 	ok = false
 	flo, ok1 := getFloat(value)
 	ok = ok1
 	if ok1 {
 		ret = int64(flo)
+	} else {
+		flo, ok1 := value.(int)
+		ok = ok1
+		if ok1 {
+			ret = int64(flo)
+		}
 	}
 	return
 }
