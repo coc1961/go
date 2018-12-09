@@ -61,7 +61,7 @@ func (e *JSON) SetRootValue(rootValue *map[string]interface{}) *JSON {
 // JSON return the json
 func (e *JSON) JSON() string {
 	b, err := json.Marshal(e.GetRoot())
-	if err != nil {
+	if err != nil || string(b) == "null" {
 		return ""
 	}
 	return string(b)
@@ -150,9 +150,6 @@ func (e *JSON) IsNil() bool {
 // Value get attribute value
 func (e *JSON) Value() interface{} {
 	ret := e.internalValue()
-	if ret == nil {
-		return nil
-	}
 	return *ret
 }
 

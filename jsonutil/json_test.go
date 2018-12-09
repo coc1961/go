@@ -53,6 +53,17 @@ func TestJSON_New(t *testing.T) {
 		}
 	})
 
+	t.Run("New Nul New", func(t *testing.T) {
+		json := New()
+		json.SetRootValue(nil)
+		if got := json.GetRoot(); got != nil {
+			t.Errorf("JSON.Get() = %v, want %v", got, nil)
+		}
+		if got := json.JSON(); got != "" {
+			t.Errorf("JSON.Get() = %v, want %v", got, "")
+		}
+	})
+
 	t.Run("Test NewFromMap New", func(t *testing.T) {
 		mp := make(map[string]interface{})
 		mp["id"] = "1"
@@ -123,6 +134,12 @@ func TestJSON_Get(t *testing.T) {
 			t.Errorf("JSON.Get() = %v, want %v", got, nil)
 		}
 	})
+	t.Run("Test Array of invalid Get", func(t *testing.T) {
+		json := NewFromString(sjson)
+		if got := json.Get("id").ValueAsArray(); got != nil {
+			t.Errorf("JSON.Get() = %v, want %v", got, nil)
+		}
+	})
 	t.Run("Test Null Value Get", func(t *testing.T) {
 		json := NewFromString(sjson)
 		if got := json.Get("id").Get("NoEsta").Get("NoEsta2").Value(); got != nil {
@@ -183,6 +200,17 @@ func TestJSON_Set(t *testing.T) {
 
 		if got := json.Get("id").Value(); got != "1" {
 			t.Errorf("JSON.Get() = %v, want %v", got, "1")
+		}
+	})
+
+	t.Run("Nil Set", func(t *testing.T) {
+		json := NewFromString(sjson)
+		mp := make(map[string]interface{})
+		mp["id"] = nil
+		json.Add("pri").Set(mp)
+
+		if got := json.Get("pri").Get("id").Value(); got != nil {
+			t.Errorf("JSON.Get() = %v, want %v", got, nil)
 		}
 	})
 
