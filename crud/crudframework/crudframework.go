@@ -2,6 +2,7 @@ package crudframework
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -124,4 +125,37 @@ func Test() {
 
 	fmt.Println(ent.JSON())
 
+}
+
+// CrudFramework crud framework
+type CrudFramework struct {
+	configPath  string
+	definitions map[string]entities.Definition
+}
+
+// New new Crud Framework
+func New(configPath string) *CrudFramework {
+	return &CrudFramework{configPath, make(map[string]entities.Definition, 0)}
+}
+
+// Load Config Files
+func (e *CrudFramework) Load() error {
+	path := filepath.Join(e.configPath, "data", "")
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		def := entities.NewEntityDefinition()
+		err := def.Load(filepath.Join(e.configPath, "data"), f.Name())
+		if err != nil {
+			return err
+		}
+		e.definitions[def.Name()] = *def
+	}
+	return nil
 }

@@ -19,28 +19,15 @@ type Definition struct {
 	byteRead  int
 }
 
-func (e *Definition) Read(p []byte) (n int, err error) {
-	str := e.json.Get("schema").JSON()
-	bt := []byte(str)
-	cont := len(p)
-	ind := 0
-	for i := e.byteRead; i < len(bt); i++ {
-		if ind >= cont {
-			break
-		}
-		p[ind] = bt[i]
-		ind++
-	}
-	e.byteRead += ind
-	n = ind
-	err = nil
-	return
+// NewEntityDefinition  New Entity Definition
+func NewEntityDefinition() *Definition {
+	return &Definition{nil, nil, nil, 0}
 }
 
 // Load Lectura de la definicion de una entidad
 func (e *Definition) Load(path, entity string) error {
 
-	fullPath := filepath.Join(path, entity+".json")
+	fullPath := filepath.Join(path, entity)
 
 	b, err := ioutil.ReadFile(fullPath)
 	if err != nil {
@@ -62,6 +49,24 @@ func (e *Definition) Load(path, entity string) error {
 	return nil
 }
 
+func (e *Definition) Read(p []byte) (n int, err error) {
+	str := e.json.Get("schema").JSON()
+	bt := []byte(str)
+	cont := len(p)
+	ind := 0
+	for i := e.byteRead; i < len(bt); i++ {
+		if ind >= cont {
+			break
+		}
+		p[ind] = bt[i]
+		ind++
+	}
+	e.byteRead += ind
+	n = ind
+	err = nil
+	return
+}
+
 // Validate Valida un json en base al schema
 func (e *Definition) Validate(sjson string) (map[string]interface{}, error) {
 	var ojson map[string]interface{}
@@ -81,6 +86,15 @@ func (e *Definition) New(sjson string) (*Entity, error) {
 	}
 	data := jsonutil.New().Set(&ojson)
 	return &Entity{e, data}, nil
+}
+
+// Name get entity Name
+func (e *Definition) Name() string {
+	str := e.json.Get("name").Value()
+	if str == nil {
+		return ""
+	}
+	return str.(string)
 }
 
 /***************************
