@@ -24,6 +24,14 @@ func NewEntityDefinition() *Definition {
 	return &Definition{nil, nil, nil, 0}
 }
 
+// IsValid IsValid
+func (e *Definition) IsValid() bool {
+	if e.schema == nil || e.validator == nil || e.json == nil {
+		return false
+	}
+	return true
+}
+
 // Load Lectura de la definicion de una entidad
 func (e *Definition) Load(path, entity string) error {
 

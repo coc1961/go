@@ -1,6 +1,7 @@
 package crudframework
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -131,11 +132,12 @@ func Test() {
 type CrudFramework struct {
 	configPath  string
 	definitions map[string]entities.Definition
+	handlers    map[string][]EventHandler
 }
 
 // New new Crud Framework
 func New(configPath string) *CrudFramework {
-	return &CrudFramework{configPath, make(map[string]entities.Definition, 0)}
+	return &CrudFramework{configPath, make(map[string]entities.Definition, 0), make(map[string][]EventHandler, 0)}
 }
 
 // Load Config Files
@@ -158,4 +160,37 @@ func (e *CrudFramework) Load() error {
 		e.definitions[def.Name()] = *def
 	}
 	return nil
+}
+
+// AddHandler add handle to entity
+func (e *CrudFramework) AddHandler(entityName string, handle EventHandler) error {
+	if entityName == "" {
+		return errors.New("null entityName")
+	}
+	if handle == nil {
+		return errors.New("null handle")
+	}
+
+	def := e.definitions[entityName]
+	if !def.IsValid() {
+		return errors.New("No Entity " + entityName + " Found!")
+	}
+	e.handlers[entityName] = append(e.handlers[entityName], handle)
+	return nil
+}
+
+/*********
+* Handlers and Validators
+**/
+
+// EventHandler Crud Handler
+type EventHandler interface {
+	OnAfterInsert(entity *entities.Entity) error
+	OnBeforeInsert(entity *entities.Entity) error
+
+	OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
+	OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
+
+	OnAfterDelete(entity *entities.Entity) error
+	OnBeforeDelete(entity *entities.Entity) error
 }
