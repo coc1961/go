@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"github.com/coc1961/go/crud/entities"
@@ -59,15 +60,41 @@ func (h *Handle) Get(c *gin.Context) {
 
 // Post get
 func (h *Handle) Post(c *gin.Context) {
+	for _, ev := range h.eventHandlers {
+		txt, _ := ioutil.ReadAll(c.Request.Body)
+		ent, _ := h.definition.New(string(txt))
+		ev.OnBeforeInsert(ent)
+	}
+	for _, ev := range h.eventHandlers {
+		txt, _ := ioutil.ReadAll(c.Request.Body)
+		ent, _ := h.definition.New(string(txt))
+		ev.OnAfterInsert(ent)
+	}
 	c.String(http.StatusOK, "Not Implemented")
 }
 
 // Put get
 func (h *Handle) Put(c *gin.Context) {
+	for _, ev := range h.eventHandlers {
+		txt, _ := ioutil.ReadAll(c.Request.Body)
+		ent, _ := h.definition.New(string(txt))
+		ev.OnBeforeUpdate(ent, nil)
+	}
+	for _, ev := range h.eventHandlers {
+		txt, _ := ioutil.ReadAll(c.Request.Body)
+		ent, _ := h.definition.New(string(txt))
+		ev.OnAfterUpdate(ent, nil)
+	}
 	c.String(http.StatusOK, "Not Implemented")
 }
 
 // Delete get
 func (h *Handle) Delete(c *gin.Context) {
+	for _, ev := range h.eventHandlers {
+		ev.OnBeforeDelete(nil)
+	}
+	for _, ev := range h.eventHandlers {
+		ev.OnAfterDelete(nil)
+	}
 	c.String(http.StatusOK, "Not Implemented")
 }
