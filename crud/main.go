@@ -15,40 +15,41 @@ func main() {
 	cf := crudframework.New(dir)
 	cf.Load()
 
-	cf.AddHandler("prueba", &Test{})
+	cf.AddEventHandler("prueba", &TestEventHandler{})
 
+	cf.Start()
 }
 
-// Test test
-type Test struct {
+// TestEventHandler test
+type TestEventHandler struct {
 }
 
 // OnAfterInsert OnAfterInsert
-func (t *Test) OnAfterInsert(entity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterInsert(entity *entities.Entity) error {
 	return nil
 }
 
 // OnBeforeInsert OnBeforeInsert
-func (t *Test) OnBeforeInsert(entity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeInsert(entity *entities.Entity) error {
 	return nil
 }
 
 // OnAfterUpdate OnAfterUpdate
-func (t *Test) OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
 	return nil
 }
 
 // OnBeforeUpdate OnBeforeUpdate
-func (t *Test) OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
 	return nil
 }
 
 // OnAfterDelete OnAfterDelete
-func (t *Test) OnAfterDelete(entity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterDelete(entity *entities.Entity) error {
 	return nil
 }
 
 // OnBeforeDelete OnBeforeDelete
-func (t *Test) OnBeforeDelete(entity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeDelete(entity *entities.Entity) error {
 	return nil
 }

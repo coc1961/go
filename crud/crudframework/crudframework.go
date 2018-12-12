@@ -2,15 +2,89 @@ package crudframework
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/coc1961/go/crud/entities"
-	"github.com/coc1961/go/jsonutil"
+	"github.com/coc1961/go/crud/handlers"
 )
 
+const (
+	//BasePath Rest Base Path
+	BasePath = "/api/v1"
+)
+
+var (
+	router = gin.Default()
+)
+
+// CrudFramework crud framework
+type CrudFramework struct {
+	configPath   string
+	definitions  map[string]*entities.Definition
+	httpHandlers map[string]*handlers.Handle
+}
+
+// New new Crud Framework
+func New(configPath string) *CrudFramework {
+	return &CrudFramework{configPath,
+		make(map[string]*entities.Definition, 0),
+		make(map[string]*handlers.Handle, 0)}
+}
+
+// Load Config Files
+func (e *CrudFramework) Load() error {
+	path := filepath.Join(e.configPath, "data", "")
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		def := entities.NewEntityDefinition()
+		err := def.Load(filepath.Join(e.configPath, "data"), f.Name())
+		if err != nil {
+			return err
+		}
+
+		// Definition
+		e.definitions[def.Name()] = def
+
+		// Handle
+		e.httpHandlers[def.Name()] = handlers.New(def)
+		e.httpHandlers[def.Name()].Register(BasePath, router)
+	}
+	return nil
+}
+
+// AddEventHandler add handle to entity
+func (e *CrudFramework) AddEventHandler(entityName string, handle handlers.EventHandler) error {
+	if entityName == "" {
+		return errors.New("null entityName")
+	}
+	if handle == nil {
+		return errors.New("null handle")
+	}
+
+	def := e.definitions[entityName]
+	if !def.IsValid() {
+		return errors.New("No Entity " + entityName + " Found!")
+	}
+	e.httpHandlers[entityName].AddEventHandler(handle)
+	return nil
+}
+
+// Start Start
+func (e *CrudFramework) Start() error {
+	return router.Run(":8080")
+}
+
+/**
 // Test Prueba
 func Test() {
 	sjson := `
@@ -38,7 +112,7 @@ func Test() {
 			"name": "Nombre2"
 		  }
 		]
-	  }	
+	  }
 	 `
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 
@@ -127,70 +201,4 @@ func Test() {
 	fmt.Println(ent.JSON())
 
 }
-
-// CrudFramework crud framework
-type CrudFramework struct {
-	configPath  string
-	definitions map[string]entities.Definition
-	handlers    map[string][]EventHandler
-}
-
-// New new Crud Framework
-func New(configPath string) *CrudFramework {
-	return &CrudFramework{configPath, make(map[string]entities.Definition, 0), make(map[string][]EventHandler, 0)}
-}
-
-// Load Config Files
-func (e *CrudFramework) Load() error {
-	path := filepath.Join(e.configPath, "data", "")
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	for _, f := range files {
-		if f.IsDir() {
-			continue
-		}
-		def := entities.NewEntityDefinition()
-		err := def.Load(filepath.Join(e.configPath, "data"), f.Name())
-		if err != nil {
-			return err
-		}
-		e.definitions[def.Name()] = *def
-	}
-	return nil
-}
-
-// AddHandler add handle to entity
-func (e *CrudFramework) AddHandler(entityName string, handle EventHandler) error {
-	if entityName == "" {
-		return errors.New("null entityName")
-	}
-	if handle == nil {
-		return errors.New("null handle")
-	}
-
-	def := e.definitions[entityName]
-	if !def.IsValid() {
-		return errors.New("No Entity " + entityName + " Found!")
-	}
-	e.handlers[entityName] = append(e.handlers[entityName], handle)
-	return nil
-}
-
-/*********
-* Handlers and Validators
-**/
-
-// EventHandler Crud Handler
-type EventHandler interface {
-	OnAfterInsert(entity *entities.Entity) error
-	OnBeforeInsert(entity *entities.Entity) error
-
-	OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
-	OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
-
-	OnAfterDelete(entity *entities.Entity) error
-	OnBeforeDelete(entity *entities.Entity) error
-}
+*/
