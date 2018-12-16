@@ -25,7 +25,7 @@ type TestEventHandler struct {
 }
 
 // OnAfterInsert OnAfterInsert
-func (t *TestEventHandler) OnAfterInsert(entity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterInsert(entity *entities.Entity, err error) error {
 	return nil
 }
 
@@ -35,7 +35,7 @@ func (t *TestEventHandler) OnBeforeInsert(entity *entities.Entity) error {
 }
 
 // OnAfterUpdate OnAfterUpdate
-func (t *TestEventHandler) OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity, err error) error {
 	return nil
 }
 
@@ -45,7 +45,7 @@ func (t *TestEventHandler) OnBeforeUpdate(entity *entities.Entity, actualEntity 
 }
 
 // OnAfterDelete OnAfterDelete
-func (t *TestEventHandler) OnAfterDelete(entity *entities.Entity) error {
+func (t *TestEventHandler) OnAfterDelete(entity *entities.Entity, err error) error {
 	return nil
 }
 

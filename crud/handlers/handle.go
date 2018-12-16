@@ -6,6 +6,7 @@ import (
 
 	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
+	"github.com/coc1961/go/jsonutil"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,13 +24,13 @@ type Handle struct {
 
 // EventHandler Crud Handler
 type EventHandler interface {
-	OnAfterInsert(entity *entities.Entity) error
+	OnAfterInsert(entity *entities.Entity, err error) error
 	OnBeforeInsert(entity *entities.Entity) error
 
-	OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
+	OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity, err error) error
 	OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
 
-	OnAfterDelete(entity *entities.Entity) error
+	OnAfterDelete(entity *entities.Entity, err error) error
 	OnBeforeDelete(entity *entities.Entity) error
 }
 
@@ -67,13 +68,13 @@ func (h *Handle) Get(c *gin.Context) {
 	if err == nil {
 		c.String(http.StatusOK, ent.JSON())
 	} else {
-		c.String(http.StatusInternalServerError, err.Error())
+		c.String(http.StatusInternalServerError, errorToJSON(err))
 	}
 }
 
 // Post get
 func (h *Handle) Post(c *gin.Context) {
-	var err error = nil
+	var err error
 	txt, _ := ioutil.ReadAll(c.Request.Body)
 	ent, _ := h.definition.New(string(txt))
 	for _, ev := range h.eventHandlers {
@@ -83,16 +84,15 @@ func (h *Handle) Post(c *gin.Context) {
 		}
 	}
 	err = h.database.Insert(ent)
-	if err == nil {
-		for _, ev := range h.eventHandlers {
-			err = ev.OnAfterInsert(ent)
-			if err != nil {
-				break
-			}
+
+	for _, ev := range h.eventHandlers {
+		err = ev.OnAfterInsert(ent, err)
+		if err != nil {
+			break
 		}
 	}
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		c.String(http.StatusBadRequest, errorToJSON(err))
 	} else {
 		c.String(http.StatusOK, ent.JSON())
 	}
@@ -106,26 +106,28 @@ func (h *Handle) Put(c *gin.Context) {
 	id := c.Param("id")
 	entAnt, err := h.database.Get(id)
 
-	if err == nil && entAnt != nil {
-		for _, ev := range h.eventHandlers {
-			err = ev.OnBeforeUpdate(ent, entAnt)
-			if err != nil {
-				break
-			}
+	for _, ev := range h.eventHandlers {
+		err1 := ev.OnBeforeUpdate(ent, entAnt)
+		if err1 != nil {
+			err = err1
+			break
 		}
+	}
 
+	if entAnt != nil {
 		err = h.database.Update(id, ent)
+	}
 
-		for _, ev := range h.eventHandlers {
-			err = ev.OnAfterUpdate(ent, entAnt)
-			if err != nil {
-				break
-			}
+	for _, ev := range h.eventHandlers {
+		err1 := ev.OnAfterUpdate(ent, entAnt, err)
+		if err1 != nil {
+			err = err1
+			break
 		}
 	}
 
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		c.String(http.StatusBadRequest, errorToJSON(err))
 	} else {
 		c.String(http.StatusOK, ent.JSON())
 	}
@@ -133,11 +135,33 @@ func (h *Handle) Put(c *gin.Context) {
 
 // Delete get
 func (h *Handle) Delete(c *gin.Context) {
+	id := c.Param("id")
+	ent, err := h.database.Get(id)
+
 	for _, ev := range h.eventHandlers {
-		ev.OnBeforeDelete(nil)
+		err = ev.OnBeforeDelete(ent)
+		if err != nil {
+			break
+		}
 	}
+
+	err = h.database.Delete(id)
+
 	for _, ev := range h.eventHandlers {
-		ev.OnAfterDelete(nil)
+		err = ev.OnAfterDelete(ent, err)
+		if err != nil {
+			break
+		}
 	}
-	c.String(http.StatusOK, "Not Implemented")
+	if err != nil {
+		c.String(http.StatusBadRequest, errorToJSON(err))
+	} else {
+		c.String(http.StatusOK, ent.JSON())
+	}
+}
+
+func errorToJSON(err error) string {
+	json := jsonutil.New()
+	json.Add("error").Set(err.Error())
+	return json.JSON()
 }
