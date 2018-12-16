@@ -1,7 +1,7 @@
 package database
 
 import (
-	"encoding/json"
+	"github.com/coc1961/go/jsonutil"
 
 	"github.com/coc1961/go/crud/entities"
 	mgo "gopkg.in/mgo.v2"
@@ -31,7 +31,6 @@ func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 	var err error
 	var entity *entities.Entity
 	var tmp = make(map[string]interface{})
-	var b []byte
 
 	// Creo la query y busco por id
 	q := d.collection.FindId(bson.ObjectIdHex(id))
@@ -41,13 +40,10 @@ func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 	}
 
 	// Convierto en json
-	b, err = json.Marshal(tmp)
-	if err != nil {
-		return nil, err
-	}
+	json := jsonutil.NewFromMap(&tmp)
 
 	// creo la entidad
-	entity, err1 := d.definition.New(string(b))
+	entity, err1 := d.definition.New(json.JSON())
 	if err1 != nil {
 		return nil, err
 	}
