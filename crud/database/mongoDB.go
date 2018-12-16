@@ -3,6 +3,8 @@ package database
 import (
 	"github.com/coc1961/go/jsonutil"
 
+	"encoding/json"
+
 	"github.com/coc1961/go/crud/entities"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -47,7 +49,6 @@ func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 	if err1 != nil {
 		return nil, err
 	}
-
 	return entity, err
 }
 
@@ -58,15 +59,51 @@ func (d *MongoDB) Find(query map[string]string) ([]*entities.Entity, error) {
 
 // Delete delete
 func (d *MongoDB) Delete(id string) error {
-	return nil
+	err := d.collection.RemoveId(bson.ObjectIdHex(id))
+	return err
 }
 
 // Insert insert
-func (d *MongoDB) Insert(id string, entity *entities.Entity) error {
+func (d *MongoDB) Insert(entity *entities.Entity) error {
+	var err error
+	var tmp = make(map[string]interface{})
+	var oid bson.ObjectId
+
+	// Genero el Id
+	oid = bson.NewObjectId()
+
+	_, err = d.definition.Validate(entity.JSON())
+	if err != nil {
+		return err
+	}
+
+	//entity.Add("_id").Set(oid)
+
+	err = json.Unmarshal([]byte(entity.JSON()), &tmp)
+	if err != nil {
+		return err
+	}
+
+	b := make(bson.M, len(tmp))
+	for k, v := range tmp {
+		b[k] = v
+	}
+	b["_id"] = oid
+
+	entity.Add("_id").Set(oid)
+
+	err = d.collection.Insert(&b)
+	if err != nil {
+		return err
+	}
+
+	//	d.collection.Insert(bson.M{"_id": oid, "foo": "bar"})
+
 	return nil
 }
 
 // Update update
 func (d *MongoDB) Update(id string, entity *entities.Entity) error {
+	//d.collection.Update()
 	return nil
 }

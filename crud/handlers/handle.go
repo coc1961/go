@@ -73,17 +73,29 @@ func (h *Handle) Get(c *gin.Context) {
 
 // Post get
 func (h *Handle) Post(c *gin.Context) {
+	var err error = nil
+	txt, _ := ioutil.ReadAll(c.Request.Body)
+	ent, _ := h.definition.New(string(txt))
 	for _, ev := range h.eventHandlers {
-		txt, _ := ioutil.ReadAll(c.Request.Body)
-		ent, _ := h.definition.New(string(txt))
-		ev.OnBeforeInsert(ent)
+		err := ev.OnBeforeInsert(ent)
+		if err != nil {
+			break
+		}
 	}
-	for _, ev := range h.eventHandlers {
-		txt, _ := ioutil.ReadAll(c.Request.Body)
-		ent, _ := h.definition.New(string(txt))
-		ev.OnAfterInsert(ent)
+	err = h.database.Insert(ent)
+	if err == nil {
+		for _, ev := range h.eventHandlers {
+			err = ev.OnAfterInsert(ent)
+			if err != nil {
+				break
+			}
+		}
 	}
-	c.String(http.StatusOK, "Not Implemented")
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+	} else {
+		c.String(http.StatusOK, ent.JSON())
+	}
 }
 
 // Put get
