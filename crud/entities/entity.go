@@ -26,7 +26,7 @@ func NewEntityDefinition() *Definition {
 
 // IsValid IsValid
 func (e *Definition) IsValid() bool {
-	if e.schema == nil || e.validator == nil || e.json == nil {
+	if e == nil || e.schema == nil || e.validator == nil || e.json == nil {
 		return false
 	}
 	return true

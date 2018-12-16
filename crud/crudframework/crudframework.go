@@ -4,9 +4,11 @@ import (
 	"errors"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
 	"github.com/coc1961/go/crud/handlers"
 )
@@ -29,9 +31,9 @@ type CrudFramework struct {
 
 // New new Crud Framework
 func New(configPath string) *CrudFramework {
-	return &CrudFramework{configPath,
-		make(map[string]*entities.Definition, 0),
-		make(map[string]*handlers.Handle, 0)}
+	return &CrudFramework{configPath: configPath,
+		definitions:  make(map[string]*entities.Definition, 0),
+		httpHandlers: make(map[string]*handlers.Handle, 0)}
 }
 
 // Load Config Files
@@ -53,11 +55,15 @@ func (e *CrudFramework) Load() error {
 		}
 
 		// Definition
-		e.definitions[def.Name()] = def
+		e.definitions[strings.ToUpper(def.Name())] = def
 
 		// Handle
-		e.httpHandlers[def.Name()] = handlers.New(def)
-		e.httpHandlers[def.Name()].Register(BasePath, router)
+		db, err := database.NewMongo("127.0.0.1", "crud", def)
+		if err != nil {
+			return err
+		}
+		e.httpHandlers[strings.ToUpper(def.Name())] = handlers.New(def, db)
+		e.httpHandlers[strings.ToUpper(def.Name())].Register(BasePath, router)
 	}
 	return nil
 }
@@ -71,11 +77,11 @@ func (e *CrudFramework) AddEventHandler(entityName string, handle handlers.Event
 		return errors.New("null handle")
 	}
 
-	def := e.definitions[entityName]
+	def := e.definitions[strings.ToUpper(entityName)]
 	if !def.IsValid() {
 		return errors.New("No Entity " + entityName + " Found!")
 	}
-	e.httpHandlers[entityName].AddEventHandler(handle)
+	e.httpHandlers[strings.ToUpper(entityName)].AddEventHandler(handle)
 	return nil
 }
 
