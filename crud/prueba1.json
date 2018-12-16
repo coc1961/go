@@ -1,0 +1,25 @@
+{
+	"id": "xy23",
+	"name": "Nombre",
+	"amount": 100.45,
+	"age": 55,
+	"creationDate": "2018-11-24T01:10:22Z",
+	"hijo": {
+		"idAtt": "cc28",
+		"nameAtt": "AttrHijo1"
+	},
+	"soyArray": [
+		"elem2",
+		"elem3"
+	],
+	"arrayOnject": [
+		{
+			"id": 124,
+			"name": "NombreoOTRO"
+		},
+		{
+			"id": 456,
+			"name": "Nombre2Otro"
+		}
+	]
+}

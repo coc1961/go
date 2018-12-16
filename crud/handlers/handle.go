@@ -100,17 +100,35 @@ func (h *Handle) Post(c *gin.Context) {
 
 // Put get
 func (h *Handle) Put(c *gin.Context) {
-	for _, ev := range h.eventHandlers {
-		txt, _ := ioutil.ReadAll(c.Request.Body)
-		ent, _ := h.definition.New(string(txt))
-		ev.OnBeforeUpdate(ent, nil)
+	txt, _ := ioutil.ReadAll(c.Request.Body)
+	ent, _ := h.definition.New(string(txt))
+
+	id := c.Param("id")
+	entAnt, err := h.database.Get(id)
+
+	if err == nil && entAnt != nil {
+		for _, ev := range h.eventHandlers {
+			err = ev.OnBeforeUpdate(ent, entAnt)
+			if err != nil {
+				break
+			}
+		}
+
+		err = h.database.Update(id, ent)
+
+		for _, ev := range h.eventHandlers {
+			err = ev.OnAfterUpdate(ent, entAnt)
+			if err != nil {
+				break
+			}
+		}
 	}
-	for _, ev := range h.eventHandlers {
-		txt, _ := ioutil.ReadAll(c.Request.Body)
-		ent, _ := h.definition.New(string(txt))
-		ev.OnAfterUpdate(ent, nil)
+
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+	} else {
+		c.String(http.StatusOK, ent.JSON())
 	}
-	c.String(http.StatusOK, "Not Implemented")
 }
 
 // Delete get
