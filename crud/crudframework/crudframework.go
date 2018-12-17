@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/coc1961/go/config"
 	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
 	"github.com/coc1961/go/crud/handlers"
@@ -58,7 +59,7 @@ func (e *CrudFramework) Load() error {
 		e.definitions[strings.ToUpper(def.Name())] = def
 
 		// Handle
-		db, err := database.NewMongo("127.0.0.1", "crud", def)
+		db, err := database.NewMongo(config.Get().MongoDbURL, config.Get().MongoDbDatabase, def)
 		if err != nil {
 			return err
 		}

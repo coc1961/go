@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 
+	"github.com/coc1961/go/config"
 	"github.com/coc1961/go/jsonutil"
 
 	"encoding/json"
@@ -55,8 +56,31 @@ func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 }
 
 // Find find
-func (d *MongoDB) Find(query map[string]string) ([]*entities.Entity, error) {
-	return nil, nil
+func (d *MongoDB) Find(query map[string]interface{}) ([]*entities.Entity, error) {
+	b := make(bson.M, len(query))
+	for k, v := range query {
+		b[k] = v
+	}
+	var result []interface{}
+	iter := d.collection.Find(&b).Limit(config.Get().FindLimit).Iter()
+	err := iter.All(&result)
+
+	ret := make([]*entities.Entity, 0)
+	if result != nil {
+		for _, v := range result {
+			tmp := v.(bson.M)
+			by, err1 := json.Marshal(&tmp)
+			if err1 == nil {
+				ent, err1 := d.definition.New(string(by))
+				if err1 == nil {
+					ret = append(ret, ent)
+				}
+
+			}
+		}
+	}
+
+	return ret, err
 }
 
 // Delete delete

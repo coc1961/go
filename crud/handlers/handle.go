@@ -58,7 +58,27 @@ func (h *Handle) Register(basePath string, router *gin.Engine) {
 
 // Find find
 func (h *Handle) Find(c *gin.Context) {
-	c.String(http.StatusOK, "Not Implemented")
+	values := c.Request.URL.Query()
+	result := make(map[string]interface{})
+	for k, v := range values {
+		if len(v) > 0 {
+			result[k] = v[0]
+		}
+	}
+
+	ent, err := h.database.Find(result)
+	if err == nil {
+		json := "["
+		coma := ""
+		for _, e := range ent {
+			json = json + coma + e.JSON()
+			coma = ","
+		}
+		json = json + "]"
+		c.String(http.StatusOK, json)
+	} else {
+		c.String(http.StatusInternalServerError, errorToJSON(err))
+	}
 }
 
 // Get get
@@ -78,16 +98,18 @@ func (h *Handle) Post(c *gin.Context) {
 	txt, _ := ioutil.ReadAll(c.Request.Body)
 	ent, _ := h.definition.New(string(txt))
 	for _, ev := range h.eventHandlers {
-		err := ev.OnBeforeInsert(ent)
-		if err != nil {
+		err1 := ev.OnBeforeInsert(ent)
+		if err1 != nil {
+			err = err1
 			break
 		}
 	}
 	err = h.database.Insert(ent)
 
 	for _, ev := range h.eventHandlers {
-		err = ev.OnAfterInsert(ent, err)
-		if err != nil {
+		err1 := ev.OnAfterInsert(ent, err)
+		if err1 != nil {
+			err = err1
 			break
 		}
 	}
@@ -139,8 +161,9 @@ func (h *Handle) Delete(c *gin.Context) {
 	ent, err := h.database.Get(id)
 
 	for _, ev := range h.eventHandlers {
-		err = ev.OnBeforeDelete(ent)
-		if err != nil {
+		err1 := ev.OnBeforeDelete(ent)
+		if err1 != nil {
+			err = err1
 			break
 		}
 	}
@@ -148,8 +171,9 @@ func (h *Handle) Delete(c *gin.Context) {
 	err = h.database.Delete(id)
 
 	for _, ev := range h.eventHandlers {
-		err = ev.OnAfterDelete(ent, err)
-		if err != nil {
+		err1 := ev.OnAfterDelete(ent, err)
+		if err1 != nil {
+			err = err1
 			break
 		}
 	}
@@ -160,6 +184,7 @@ func (h *Handle) Delete(c *gin.Context) {
 	}
 }
 
+// Convierto un error en json
 func errorToJSON(err error) string {
 	json := jsonutil.New()
 	json.Add("error").Set(err.Error())
