@@ -59,7 +59,7 @@ func (e *CrudFramework) Load() error {
 		e.definitions[strings.ToUpper(def.Name())] = def
 
 		// Handle
-		db, err := database.NewMongo(config.Get().MongoDbURL, config.Get().MongoDbDatabase, def)
+		db, err := database.NewMongo(config.Get().DatabaseConfig[0], config.Get().DatabaseConfig[1], def)
 		if err != nil {
 			return err
 		}

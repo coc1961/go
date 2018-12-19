@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -58,6 +59,11 @@ func (h *Handle) Register(basePath string, router *gin.Engine) {
 
 // Find find
 func (h *Handle) Find(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.String(http.StatusInternalServerError, errorToJSON(fmt.Errorf("%s", r)))
+		}
+	}()
 	values := c.Request.URL.Query()
 	result := make(map[string]interface{})
 	for k, v := range values {
@@ -77,23 +83,33 @@ func (h *Handle) Find(c *gin.Context) {
 		json = json + "]"
 		c.String(http.StatusOK, json)
 	} else {
-		c.String(http.StatusInternalServerError, errorToJSON(err))
+		c.String(http.StatusBadRequest, errorToJSON(err))
 	}
 }
 
 // Get get
 func (h *Handle) Get(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.String(http.StatusInternalServerError, errorToJSON(fmt.Errorf("%s", r)))
+		}
+	}()
 	id := c.Param("id")
 	ent, err := h.database.Get(id)
 	if err == nil {
 		c.String(http.StatusOK, ent.JSON())
 	} else {
-		c.String(http.StatusInternalServerError, errorToJSON(err))
+		c.String(http.StatusBadRequest, errorToJSON(err))
 	}
 }
 
 // Post get
 func (h *Handle) Post(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.String(http.StatusInternalServerError, errorToJSON(fmt.Errorf("%s", r)))
+		}
+	}()
 	var err error
 	txt, _ := ioutil.ReadAll(c.Request.Body)
 	ent, _ := h.definition.New(string(txt))
@@ -122,8 +138,19 @@ func (h *Handle) Post(c *gin.Context) {
 
 // Put get
 func (h *Handle) Put(c *gin.Context) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			c.String(http.StatusInternalServerError, errorToJSON(fmt.Errorf("%s", r)))
+		}
+	}()
+
 	txt, _ := ioutil.ReadAll(c.Request.Body)
-	ent, _ := h.definition.New(string(txt))
+	ent, err1 := h.definition.New(string(txt))
+	if err1 != nil {
+		c.String(http.StatusBadRequest, errorToJSON(err1))
+		return
+	}
 
 	id := c.Param("id")
 	entAnt, err := h.database.Get(id)
@@ -148,6 +175,9 @@ func (h *Handle) Put(c *gin.Context) {
 		}
 	}
 
+	if entAnt == nil {
+		err = fmt.Errorf("Not Found")
+	}
 	if err != nil {
 		c.String(http.StatusBadRequest, errorToJSON(err))
 	} else {
@@ -157,6 +187,11 @@ func (h *Handle) Put(c *gin.Context) {
 
 // Delete get
 func (h *Handle) Delete(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.String(http.StatusInternalServerError, errorToJSON(fmt.Errorf("%s", r)))
+		}
+	}()
 	id := c.Param("id")
 	ent, err := h.database.Get(id)
 

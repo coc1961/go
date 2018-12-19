@@ -8,6 +8,7 @@
         "$id": "http://example.com/root.json",
         "type": "object",
         "title": "The Root Schema",
+        "additionalProperties": false,
         "required": [
             "id",
             "name",
@@ -19,6 +20,12 @@
             "arrayOnject"
         ],
         "properties": {
+            "_id": {
+                "$id": "#/properties/_id",
+                "type": "string",
+                "title": "The Internal Id Schema",
+                "default": ""
+            },
             "id": {
                 "$id": "#/properties/id",
                 "type": "string",

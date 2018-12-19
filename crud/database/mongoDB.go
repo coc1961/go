@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/coc1961/go/config"
 	"github.com/coc1961/go/jsonutil"
@@ -31,6 +32,22 @@ func NewMongo(ip, database string, definition *entities.Definition) (Database, e
 	return &MongoDB{collection: c, definition: definition}, nil
 }
 
+func recoverError(reco interface{}) error {
+	if reco != nil {
+		return fmt.Errorf("%s", reco)
+	}
+	return nil
+}
+
+func toObjectID(id string) (oid bson.ObjectId, err error) {
+	defer func() {
+		err = recoverError(recover())
+	}()
+	oid = bson.ObjectIdHex(id)
+	err = nil
+	return oid, err
+}
+
 // Get get
 func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 	var err error
@@ -38,7 +55,11 @@ func (d *MongoDB) Get(id string) (*entities.Entity, error) {
 	var tmp = make(map[string]interface{})
 
 	// Creo la query y busco por id
-	q := d.collection.FindId(bson.ObjectIdHex(id))
+	oid, err := toObjectID(id)
+	if err != nil {
+		return nil, err
+	}
+	q := d.collection.FindId(oid)
 	err = q.One(&tmp)
 	if err != nil {
 		return nil, err
@@ -85,7 +106,11 @@ func (d *MongoDB) Find(query map[string]interface{}) ([]*entities.Entity, error)
 
 // Delete delete
 func (d *MongoDB) Delete(id string) error {
-	err := d.collection.RemoveId(bson.ObjectIdHex(id))
+	oid, err := toObjectID(id)
+	if err != nil {
+		return err
+	}
+	err = d.collection.RemoveId(oid)
 	return err
 }
 
@@ -150,7 +175,11 @@ func (d *MongoDB) Update(id string, entity *entities.Entity) error {
 	for k, v := range tmp {
 		b[k] = v
 	}
-	b["_id"] = bson.ObjectIdHex(id)
+	oid, err := toObjectID(id)
+	if err != nil {
+		return err
+	}
+	b["_id"] = oid
 	entity.Add("_id").Set(b["_id"])
 
 	err = d.collection.UpdateId(b["_id"], &b)

@@ -60,6 +60,16 @@ func (e *JSON) SetRootValue(rootValue *map[string]interface{}) *JSON {
 
 // JSON return the json
 func (e *JSON) JSON() string {
+	mp, pt := e.parentPath()
+	if pt != "" && mp != nil {
+		tmp := (*mp)[pt]
+		b, err := json.Marshal(tmp)
+		if err != nil || string(b) == "null" {
+			return ""
+		}
+		return string(b)
+	}
+
 	b, err := json.Marshal(e.GetRoot())
 	if err != nil || string(b) == "null" {
 		return ""

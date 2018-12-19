@@ -132,5 +132,8 @@ func (e *Entity) Add(attName string) *jsonutil.JSON {
 
 // JSON return the json
 func (e *Entity) JSON() string {
+	if e == nil {
+		return "{}"
+	}
 	return e.data.JSON()
 }
