@@ -120,13 +120,15 @@ func (h *Handle) Post(c *gin.Context) {
 			break
 		}
 	}
-	err = h.database.Insert(ent)
+	if err == nil {
+		err = h.database.Insert(ent)
 
-	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterInsert(h.database, ent, err)
-		if err1 != nil {
-			err = err1
-			break
+		for _, ev := range h.eventHandlers {
+			err1 := ev.OnAfterInsert(h.database, ent, err)
+			if err1 != nil {
+				err = err1
+				break
+			}
 		}
 	}
 	if err != nil {
@@ -163,20 +165,22 @@ func (h *Handle) Put(c *gin.Context) {
 		}
 	}
 
-	if entAnt != nil {
-		err = h.database.Update(id, ent)
-	}
-
-	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterUpdate(h.database, ent, entAnt, err)
-		if err1 != nil {
-			err = err1
-			break
+	if err == nil {
+		if entAnt != nil {
+			err = h.database.Update(id, ent)
 		}
-	}
 
-	if entAnt == nil {
-		err = fmt.Errorf("Not Found")
+		for _, ev := range h.eventHandlers {
+			err1 := ev.OnAfterUpdate(h.database, ent, entAnt, err)
+			if err1 != nil {
+				err = err1
+				break
+			}
+		}
+
+		if entAnt == nil {
+			err = fmt.Errorf("Not Found")
+		}
 	}
 	if err != nil {
 		c.String(http.StatusBadRequest, errorToJSON(err))
@@ -202,14 +206,15 @@ func (h *Handle) Delete(c *gin.Context) {
 			break
 		}
 	}
+	if err == nil {
+		err = h.database.Delete(id)
 
-	err = h.database.Delete(id)
-
-	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterDelete(h.database, ent, err)
-		if err1 != nil {
-			err = err1
-			break
+		for _, ev := range h.eventHandlers {
+			err1 := ev.OnAfterDelete(h.database, ent, err)
+			if err1 != nil {
+				err = err1
+				break
+			}
 		}
 	}
 	if err != nil {

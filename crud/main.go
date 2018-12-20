@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -37,7 +38,15 @@ func (t *TestEventHandler) OnAfterInsert(db database.Database, entity *entities.
 
 // OnBeforeInsert OnBeforeInsert
 func (t *TestEventHandler) OnBeforeInsert(db database.Database, entity *entities.Entity) error {
-	return nil
+	query := make(map[string]interface{}, 1)
+	query["id"] = entity.Get("id").Value().(string)
+	lst, err := db.Find(query)
+	if err == nil {
+		if lst != nil && len(lst) > 0 {
+			err = errors.New("Record Duplicated!")
+		}
+	}
+	return err
 }
 
 // OnAfterUpdate OnAfterUpdate
