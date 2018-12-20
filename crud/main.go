@@ -14,7 +14,12 @@ func main() {
 	dir = "/home/carlos/gopath/src/github.com/coc1961/go/crud"
 
 	cf := crudframework.New(dir)
-	cf.Load(&database.MongoDBFactory{})
+
+	var factory database.Factory
+
+	factory = &database.MongoDBFactory{}
+
+	cf.Load(factory)
 
 	cf.AddEventHandler("prueba", &TestEventHandler{})
 
