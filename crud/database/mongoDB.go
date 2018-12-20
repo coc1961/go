@@ -14,22 +14,41 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+/**********
+* Factory
+**********/
+
+// MongoDBFactory MongoDBFactory
+type MongoDBFactory struct {
+}
+
+// Create Return a Mongodb Instance
+func (f *MongoDBFactory) Create() (Database, error) {
+	return NewMongo(config.Get().DatabaseConfig[0], config.Get().DatabaseConfig[1])
+}
+
+/**********************
+* Mongo Db Database
+***********************/
+
 // MongoDB implementacion en mongo
 type MongoDB struct {
 	definition *entities.Definition
 	collection *mgo.Collection
+	session    *mgo.Session
+	ip         string
+	database   string
 }
 
 // NewMongo nueva instancia
-func NewMongo(ip, database string, definition *entities.Definition) (Database, error) {
+func NewMongo(ip, database string) (Database, error) {
 	session, err := mgo.Dial(ip)
 	if err != nil {
 		return nil, err
 	}
 	// Optional. Switch the session to a monotonic behavior.
 	session.SetMode(mgo.Monotonic, true)
-	c := session.DB(database).C(definition.Name())
-	return &MongoDB{collection: c, definition: definition}, nil
+	return &MongoDB{collection: nil, definition: nil, session: session, ip: ip, database: database}, nil
 }
 
 func recoverError(reco interface{}) error {
@@ -46,6 +65,13 @@ func toObjectID(id string) (oid bson.ObjectId, err error) {
 	oid = bson.ObjectIdHex(id)
 	err = nil
 	return oid, err
+}
+
+// SetDefinition Set Definition
+func (d *MongoDB) SetDefinition(definition *entities.Definition) {
+	c := d.session.DB(d.database).C(definition.Name())
+	d.collection = c
+	d.definition = definition
 }
 
 // Get get

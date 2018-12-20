@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/coc1961/go/crud/crudframework"
+	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
 )
 
@@ -13,7 +14,7 @@ func main() {
 	dir = "/home/carlos/gopath/src/github.com/coc1961/go/crud"
 
 	cf := crudframework.New(dir)
-	cf.Load()
+	cf.Load(&database.MongoDBFactory{})
 
 	cf.AddEventHandler("prueba", &TestEventHandler{})
 

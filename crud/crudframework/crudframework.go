@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/coc1961/go/config"
 	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
 	"github.com/coc1961/go/crud/handlers"
@@ -38,7 +37,7 @@ func New(configPath string) *CrudFramework {
 }
 
 // Load Config Files
-func (e *CrudFramework) Load() error {
+func (e *CrudFramework) Load(dbfactory database.Factory) error {
 	path := filepath.Join(e.configPath, "data", "")
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
@@ -59,10 +58,12 @@ func (e *CrudFramework) Load() error {
 		e.definitions[strings.ToUpper(def.Name())] = def
 
 		// Handle
-		db, err := database.NewMongo(config.Get().DatabaseConfig[0], config.Get().DatabaseConfig[1], def)
+		db, err := dbfactory.Create()
 		if err != nil {
 			return err
 		}
+		db.SetDefinition(def)
+
 		e.httpHandlers[strings.ToUpper(def.Name())] = handlers.New(def, db)
 		e.httpHandlers[strings.ToUpper(def.Name())].Register(BasePath, router)
 	}
