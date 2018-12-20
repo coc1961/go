@@ -112,7 +112,11 @@ func (h *Handle) Post(c *gin.Context) {
 	}()
 	var err error
 	txt, _ := ioutil.ReadAll(c.Request.Body)
-	ent, _ := h.definition.New(string(txt))
+	ent, err1 := h.definition.New(string(txt))
+	if err1 != nil {
+		c.String(http.StatusBadRequest, errorToJSON(err1))
+		return
+	}
 	for _, ev := range h.eventHandlers {
 		err1 := ev.OnBeforeInsert(h.database, ent)
 		if err1 != nil {
