@@ -14,16 +14,20 @@ func main() {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	dir = "/home/carlos/gopath/src/github.com/coc1961/go/crud"
 
+	// Creo el framework
 	cf := crudframework.New(dir)
 
+	// Configuro el driver de la base de datos
 	var factory database.Factory
-
 	factory = &database.MongoDBFactory{}
 
-	cf.Load(factory)
+	// Inicializo el framework con el drive de base de datos
+	cf.InitFramework(factory)
 
+	// Agrego un validador suscripto a los eventos
 	cf.AddEventHandler("prueba", &TestEventHandler{})
 
+	// Inicio el Server
 	cf.Start()
 }
 

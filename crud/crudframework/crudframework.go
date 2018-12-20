@@ -36,8 +36,8 @@ func New(configPath string) *CrudFramework {
 		httpHandlers: make(map[string]*handlers.Handle, 0)}
 }
 
-// Load Config Files
-func (e *CrudFramework) Load(dbfactory database.Factory) error {
+// InitFramework Config Files
+func (e *CrudFramework) InitFramework(dbfactory database.Factory) error {
 	path := filepath.Join(e.configPath, "data", "")
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
