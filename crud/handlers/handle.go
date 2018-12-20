@@ -25,14 +25,14 @@ type Handle struct {
 
 // EventHandler Crud Handler
 type EventHandler interface {
-	OnAfterInsert(entity *entities.Entity, err error) error
-	OnBeforeInsert(entity *entities.Entity) error
+	OnAfterInsert(db database.Database, entity *entities.Entity, err error) error
+	OnBeforeInsert(db database.Database, entity *entities.Entity) error
 
-	OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity, err error) error
-	OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error
+	OnAfterUpdate(db database.Database, entity *entities.Entity, actualEntity *entities.Entity, err error) error
+	OnBeforeUpdate(db database.Database, entity *entities.Entity, actualEntity *entities.Entity) error
 
-	OnAfterDelete(entity *entities.Entity, err error) error
-	OnBeforeDelete(entity *entities.Entity) error
+	OnAfterDelete(db database.Database, entity *entities.Entity, err error) error
+	OnBeforeDelete(db database.Database, entity *entities.Entity) error
 }
 
 // New nuevo handler
@@ -114,7 +114,7 @@ func (h *Handle) Post(c *gin.Context) {
 	txt, _ := ioutil.ReadAll(c.Request.Body)
 	ent, _ := h.definition.New(string(txt))
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnBeforeInsert(ent)
+		err1 := ev.OnBeforeInsert(h.database, ent)
 		if err1 != nil {
 			err = err1
 			break
@@ -123,7 +123,7 @@ func (h *Handle) Post(c *gin.Context) {
 	err = h.database.Insert(ent)
 
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterInsert(ent, err)
+		err1 := ev.OnAfterInsert(h.database, ent, err)
 		if err1 != nil {
 			err = err1
 			break
@@ -156,7 +156,7 @@ func (h *Handle) Put(c *gin.Context) {
 	entAnt, err := h.database.Get(id)
 
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnBeforeUpdate(ent, entAnt)
+		err1 := ev.OnBeforeUpdate(h.database, ent, entAnt)
 		if err1 != nil {
 			err = err1
 			break
@@ -168,7 +168,7 @@ func (h *Handle) Put(c *gin.Context) {
 	}
 
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterUpdate(ent, entAnt, err)
+		err1 := ev.OnAfterUpdate(h.database, ent, entAnt, err)
 		if err1 != nil {
 			err = err1
 			break
@@ -196,7 +196,7 @@ func (h *Handle) Delete(c *gin.Context) {
 	ent, err := h.database.Get(id)
 
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnBeforeDelete(ent)
+		err1 := ev.OnBeforeDelete(h.database, ent)
 		if err1 != nil {
 			err = err1
 			break
@@ -206,7 +206,7 @@ func (h *Handle) Delete(c *gin.Context) {
 	err = h.database.Delete(id)
 
 	for _, ev := range h.eventHandlers {
-		err1 := ev.OnAfterDelete(ent, err)
+		err1 := ev.OnAfterDelete(h.database, ent, err)
 		if err1 != nil {
 			err = err1
 			break

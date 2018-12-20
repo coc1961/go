@@ -31,31 +31,31 @@ type TestEventHandler struct {
 }
 
 // OnAfterInsert OnAfterInsert
-func (t *TestEventHandler) OnAfterInsert(entity *entities.Entity, err error) error {
+func (t *TestEventHandler) OnAfterInsert(db database.Database, entity *entities.Entity, err error) error {
 	return nil
 }
 
 // OnBeforeInsert OnBeforeInsert
-func (t *TestEventHandler) OnBeforeInsert(entity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeInsert(db database.Database, entity *entities.Entity) error {
 	return nil
 }
 
 // OnAfterUpdate OnAfterUpdate
-func (t *TestEventHandler) OnAfterUpdate(entity *entities.Entity, actualEntity *entities.Entity, err error) error {
+func (t *TestEventHandler) OnAfterUpdate(db database.Database, entity *entities.Entity, actualEntity *entities.Entity, err error) error {
 	return nil
 }
 
 // OnBeforeUpdate OnBeforeUpdate
-func (t *TestEventHandler) OnBeforeUpdate(entity *entities.Entity, actualEntity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeUpdate(db database.Database, entity *entities.Entity, actualEntity *entities.Entity) error {
 	return nil
 }
 
 // OnAfterDelete OnAfterDelete
-func (t *TestEventHandler) OnAfterDelete(entity *entities.Entity, err error) error {
+func (t *TestEventHandler) OnAfterDelete(db database.Database, entity *entities.Entity, err error) error {
 	return nil
 }
 
 // OnBeforeDelete OnBeforeDelete
-func (t *TestEventHandler) OnBeforeDelete(entity *entities.Entity) error {
+func (t *TestEventHandler) OnBeforeDelete(db database.Database, entity *entities.Entity) error {
 	return nil
 }
