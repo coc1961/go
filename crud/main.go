@@ -28,7 +28,7 @@ func main() {
 	cf.AddEventHandler("prueba", &TestEventHandler{})
 
 	// Inicio el Server
-	cf.Start()
+	cf.Start("8080")
 }
 
 // TestEventHandler test

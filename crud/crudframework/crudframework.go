@@ -87,9 +87,17 @@ func (e *CrudFramework) AddEventHandler(entityName string, handle handlers.Event
 	return nil
 }
 
+// GetRouter se retorna el router para poder agregar nuevos endpoints
+func (e *CrudFramework) GetRouter() *gin.Engine {
+	return router
+}
+
 // Start Start
-func (e *CrudFramework) Start() error {
-	return router.Run(":8080")
+func (e *CrudFramework) Start(port string) error {
+	if port == "" {
+		port = "8080"
+	}
+	return router.Run(":" + port)
 }
 
 /**
