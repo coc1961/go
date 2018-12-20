@@ -47,7 +47,7 @@ func (t *TestEventHandler) OnBeforeInsert(db database.Database, entity *entities
 	lst, err := db.Find(query)
 	if err == nil {
 		if lst != nil && len(lst) > 0 {
-			err = errors.New("Record Duplicated!")
+			err = errors.New("record duplicated")
 		}
 	}
 	return err
