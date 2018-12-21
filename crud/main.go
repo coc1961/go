@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/coc1961/go/crud/crudframework"
 	"github.com/coc1961/go/crud/database"
+	"github.com/coc1961/go/crud/driver"
 	"github.com/coc1961/go/crud/entities"
 )
 
@@ -19,7 +19,8 @@ func main() {
 
 	// Configuro el driver de la base de datos
 	var factory database.Factory
-	factory = &database.MongoDBFactory{}
+	//factory = &driver.MongoDBFactory{}
+	factory = &driver.TiedotDBFactory{}
 
 	// Inicializo el framework con el drive de base de datos
 	cf.InitFramework(factory)
@@ -42,15 +43,18 @@ func (t *TestEventHandler) OnAfterInsert(db database.Database, entity *entities.
 
 // OnBeforeInsert OnBeforeInsert
 func (t *TestEventHandler) OnBeforeInsert(db database.Database, entity *entities.Entity) error {
-	query := make(map[string]interface{}, 1)
-	query["id"] = entity.Get("id").Value().(string)
-	lst, err := db.Find(query)
-	if err == nil {
-		if lst != nil && len(lst) > 0 {
-			err = errors.New("record duplicated")
+	/*
+		query := make(map[string]interface{}, 1)
+		query["id"] = entity.Get("id").Value().(string)
+		lst, err := db.Find(query)
+		if err == nil {
+			if lst != nil && len(lst) > 0 {
+				err = errors.New("record duplicated")
+			}
 		}
-	}
-	return err
+		return err
+	*/
+	return nil
 }
 
 // OnAfterUpdate OnAfterUpdate

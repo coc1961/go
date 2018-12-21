@@ -24,6 +24,11 @@ func NewEntityDefinition() *Definition {
 	return &Definition{nil, nil, nil, 0}
 }
 
+// Schema return Schema
+func (e *Definition) Schema() *schema.Schema {
+	return e.schema
+}
+
 // IsValid IsValid
 func (e *Definition) IsValid() bool {
 	if e == nil || e.schema == nil || e.validator == nil || e.json == nil {

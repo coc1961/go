@@ -1,4 +1,4 @@
-package database
+package driver
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/coc1961/go/crud/database"
 	"github.com/coc1961/go/crud/entities"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -23,7 +24,7 @@ type MongoDBFactory struct {
 }
 
 // Create Return a Mongodb Instance
-func (f *MongoDBFactory) Create() (Database, error) {
+func (f *MongoDBFactory) Create() (database.Database, error) {
 	return NewMongo(config.Get().DatabaseConfig[0], config.Get().DatabaseConfig[1])
 }
 
@@ -41,7 +42,7 @@ type MongoDB struct {
 }
 
 // NewMongo nueva instancia
-func NewMongo(ip, database string) (Database, error) {
+func NewMongo(ip, database string) (database.Database, error) {
 	session, err := mgo.Dial(ip)
 	if err != nil {
 		return nil, err

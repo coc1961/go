@@ -16,7 +16,8 @@ var config *Config
 // Get get
 func Get() *Config {
 	if config == nil {
-		databaseConfig := strings.Split("127.0.0.1|crud", "|")
+		//databaseConfig := strings.Split("127.0.0.1|crud", "|")
+		databaseConfig := strings.Split("/tmp|crudDB", "|")
 		if os.Getenv("DATABASE_CONFIG") != "" {
 			databaseConfig = strings.Split(os.Getenv("DATABASE_CONFIG"), "|")
 		}
