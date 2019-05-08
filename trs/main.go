@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 func main() {
@@ -42,6 +43,9 @@ func main() {
 }
 
 func replaceLine(line string, from string, to string) string {
+	to = strings.ReplaceAll(to, "\\n", "\n")
+	to = strings.ReplaceAll(to, "\\r", "\r")
+	to = strings.ReplaceAll(to, "\\t", "\t")
 	rfrom, _ := regexp.Compile(from)
 	ret := rfrom.ReplaceAllString(line, to)
 	return ret
