@@ -43,9 +43,9 @@ func main() {
 }
 
 func replaceLine(line string, from string, to string) string {
-	to = strings.ReplaceAll(to, "\\n", "\n")
-	to = strings.ReplaceAll(to, "\\r", "\r")
-	to = strings.ReplaceAll(to, "\\t", "\t")
+	to = strings.Replace(to, "\\n", "\n", -1)
+	to = strings.Replace(to, "\\r", "\r", -1)
+	to = strings.Replace(to, "\\t", "\t", -1)
 	rfrom, _ := regexp.Compile(from)
 	ret := rfrom.ReplaceAllString(line, to)
 	return ret
